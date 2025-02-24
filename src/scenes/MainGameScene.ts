@@ -39,13 +39,7 @@ export class Game extends Scene
 
     create ()
     {
-        const colorPalette = [
-            0x020100,
-            0x235789,
-            0xC1292E,
-            0xFDFFFC,
-            0xF1D302,
-        ];
+
         this.bg = this.add.tileSprite(0, 0, this.cameras.main.width, this.cameras.main.height, 'bg').setOrigin(0).setTileScale(2);
         this.planet = this.add.image(0, -512, 'planet').setOrigin(0);
         
@@ -140,7 +134,7 @@ export class Game extends Scene
                     enemy.play('ufoShoot');
                     enemy.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
                         enemy.setTexture('sprites', 'ufoRed.png');
-                        let bullet: Phaser.GameObjects.Rectangle = this.add.rectangle(enemy.x, enemy.y, 4, 13, 0xFDFFFC).setOrigin(0.5);
+                        let bullet: Phaser.GameObjects.Rectangle = this.add.rectangle(enemy.x, enemy.y, 4, 13, 0xC1292E).setOrigin(0.5);
                         this.enemyBullets.add(bullet);
                         let bulletBody: Phaser.Physics.Arcade.Body = bullet.body as Phaser.Physics.Arcade.Body;
                         bulletBody.allowGravity = false;
@@ -158,13 +152,6 @@ export class Game extends Scene
 
     update(_timeSinceLaunch: number, deltaTime: number)
     {
-        const colorPalette = [
-            0x020100,
-            0x235789,
-            0xC1292E,
-            0xFDFFFC,
-            0xF1D302,
-        ];
 
         this.bg.tilePositionY -= 0.1 * deltaTime;
         this.planet.y += 0.40 * deltaTime;
@@ -176,7 +163,7 @@ export class Game extends Scene
         }
 
         if( this.player.active && this.spaceKey.isDown && _timeSinceLaunch - this.lastShotTime > this.playerRateOfFire * 1000){
-            let bullet: Phaser.GameObjects.Rectangle = this.add.rectangle(this.player.x, this.player.y - this.player.displayHeight / 2, 4, 13, colorPalette[2]).setOrigin(0.5);
+            let bullet: Phaser.GameObjects.Rectangle = this.add.rectangle(this.player.x, this.player.y - this.player.displayHeight / 2, 4, 13, 0xFDFFFC).setOrigin(0.5);
             this.bullets.add(bullet);
             let bulletBody: Phaser.Physics.Arcade.Body = bullet.body as Phaser.Physics.Arcade.Body;
             bulletBody.allowGravity = false;
