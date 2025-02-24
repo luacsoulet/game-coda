@@ -4,7 +4,7 @@
 			"image": "gameSprites",
 			"format": "RGBA8888",
 			"size": {
-				"w": 91,
+				"w": 166,
 				"h": 400
 			},
 			"scale": 1,
@@ -73,7 +73,7 @@
 					}
 				},
 				{
-					"filename": "ufoRed.png",
+					"filename": "ufoRed-shoot2.png",
 					"rotated": false,
 					"trimmed": false,
 					"sourceSize": {
@@ -89,6 +89,48 @@
 					"frame": {
 						"x": 0,
 						"y": 309,
+						"w": 91,
+						"h": 91
+					}
+				},
+				{
+					"filename": "ufoRed-shoot3.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 91,
+						"h": 91
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 91,
+						"h": 91
+					},
+					"frame": {
+						"x": 75,
+						"y": 0,
+						"w": 91,
+						"h": 91
+					}
+				},
+				{
+					"filename": "ufoRed.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 91,
+						"h": 91
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 91,
+						"h": 91
+					},
+					"frame": {
+						"x": 75,
+						"y": 91,
 						"w": 91,
 						"h": 91
 					}
