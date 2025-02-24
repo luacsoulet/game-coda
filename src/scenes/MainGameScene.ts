@@ -66,6 +66,10 @@ export class Game extends Scene
             this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE).on('down', () => {
                 this.selectPlayerShip(3);
             });
+            this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R).on('down', () => {
+                this.restartGame();
+            });
+            
         }
         else{
             console.log('no keyboard input');
@@ -86,16 +90,17 @@ export class Game extends Scene
             enemyBullet.destroy();
             player.destroy();
         });
-
-        this.anims.create({
-            key:'ufoShoot',
-            frames: [
-                { key: 'sprites', frame: 'ufoRed.png' },
-                { key: 'sprites', frame: 'ufoRed-shoot2.png' },
-                { key: 'sprites', frame: 'ufoRed-shoot3.png' },
-            ],
-            frameRate: 4,
-        })
+        if(!this.anims.exists('ufoShoot')){
+            this.anims.create({
+                key:'ufoShoot',
+                frames: [
+                    { key: 'sprites', frame: 'ufoRed.png' },
+                    { key: 'sprites', frame: 'ufoRed-shoot2.png' },
+                    { key: 'sprites', frame: 'ufoRed-shoot3.png' },
+                ],
+                frameRate: 4,
+            })
+        }
 
         this.time.addEvent({
             delay: 1500,
@@ -106,6 +111,10 @@ export class Game extends Scene
 
         this.playerScore = 0;
         this.lastShotTime = 0;
+    }
+
+    private restartGame(){
+        this.scene.restart();
     }
 
     private selectPlayerShip(shipNumber: number){
@@ -128,7 +137,7 @@ export class Game extends Scene
         enemyBody.setVelocityY(256);
 
         this.time.addEvent({
-            delay: 1500,
+            delay: Phaser.Math.Between(800, 2000),
             callback: () => {
                 if (enemy.active){
                     enemy.play('ufoShoot');
@@ -157,9 +166,14 @@ export class Game extends Scene
         this.planet.y += 0.40 * deltaTime;
         if(this.leftKey.isDown){
             this.player.x -= this.playerShipData.movementSpeed * deltaTime;
+            this.player.angle = Phaser.Math.Linear(this.player.angle, -105, 0.1);
         }
         else if(this.rightKey.isDown){
             this.player.x += this.playerShipData.movementSpeed * deltaTime;
+            this.player.angle = Phaser.Math.Linear(this.player.angle, -75, 0.1);
+        }
+        else {
+            this.player.angle = Phaser.Math.Linear(this.player.angle, -90, 0.1);
         }
 
         if( this.player.active && this.spaceKey.isDown && _timeSinceLaunch - this.lastShotTime > this.playerRateOfFire * 1000){

@@ -20,6 +20,9 @@ const config: Types.Core.GameConfig = {
         }
     },
     fps:{forceSetTimeOut: true, target: 60},
+    audio: {
+        noAudio: true
+    },
     scene: [
         MainGame
     ]
