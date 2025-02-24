@@ -30,6 +30,9 @@ export class Game extends Scene
         this.load.image('bg', 'Background/bg.png');
         this.load.image('planet', 'Planets/planet01.png');
         this.load.atlas('sprites', 'Spritesheet/gameSprites.png', 'Spritesheet/gameSprites.json');
+
+        this.load.audio('sfx_laser1', 'Sounds/sfx_laser1.ogg');
+        this.load.audio('sfx_laser2', 'Sounds/sfx_laser2.ogg');
     }
 
     create ()
@@ -108,6 +111,7 @@ export class Game extends Scene
                     bulletBody.allowGravity = false;
                     bulletBody.setFriction(0,0);
                     bulletBody.setVelocityY(512);
+                    this.sound.play('sfx_laser2');
                 }
             },
             callbackScope: this,
@@ -144,6 +148,7 @@ export class Game extends Scene
             bulletBody.setVelocityY(-1024);
 
             this.lastShotTime = _timeSinceLaunch;
+            this.sound.play('sfx_laser1');
         }
 
         this.player.x = Phaser.Math.Clamp(this.player.x, this.player.displayWidth / 2, this.cameras.main.width - this.player.displayWidth / 2);
