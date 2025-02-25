@@ -1,7 +1,9 @@
 import { GameObjects, Scene } from 'phaser';
-
-export class Game extends Scene
-{
+import { Bullet } from '../entities/Bullet';
+import { GroupUtils } from '../utils/GroupUtils';
+import { Enemy } from '../entities/Enemy';
+import { Player } from '../entities/Player';
+export class Game extends Scene {
     private player: Phaser.GameObjects.Image;
     private playerShipData: PlayerShipData;
     private cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -17,16 +19,14 @@ export class Game extends Scene
     private bg: Phaser.GameObjects.TileSprite;
     private planet: Phaser.GameObjects.Image;
 
-    constructor ()
-    {
+    constructor() {
         super('Game');
     }
 
 
-    preload ()
-    {
+    preload() {
         this.load.setPath('assets');
-        
+
         this.load.image('bg', 'Background/bg.png');
         this.load.image('planet', 'Planets/planet01.png');
         this.load.atlas('sprites', 'Spritesheet/gameSprites.png', 'Spritesheet/gameSprites.json');
@@ -37,21 +37,32 @@ export class Game extends Scene
         this.load.json('playerShips', 'Data/playerShips.json');
     }
 
-    create ()
-    {
+    create() {
 
         this.bg = this.add.tileSprite(0, 0, this.cameras.main.width, this.cameras.main.height, 'bg').setOrigin(0).setTileScale(2);
         this.planet = this.add.image(0, -512, 'planet').setOrigin(0);
-        
+
         const playerShipsData = this.cache.json.get('playerShips') as PlayerShipsData;
         this.playerShipData = playerShipsData["1"];
 
-        this.player = this.add.image(this.cameras.main.centerX, this.cameras.main.height - 128, 'sprites', this.playerShipData.texture).setAngle(-90).setOrigin(0.5);
+        this.bullets = this.physics.add.group({
+            classType: Bullet,
+            runChildUpdate: true,
+            createCallback: (bullet) => {
+                (bullet as Bullet).init();
+            }
+        });
+
+        const bulletUtils = new GroupUtils();
+        bulletUtils.preallocateGroup(this.bullets, 5);
+
+        this.player = new Player(this, this.cameras.main.centerX, this.cameras.main.height - 128, 'sprites', this.bullets).setOrigin(0.5);
         this.physics.add.existing(this.player);
+
         const playerBody = this.player.body as Phaser.Physics.Arcade.Body;
         playerBody.setOffset(-1, -2);
 
-        if(this.input.keyboard){
+        if (this.input.keyboard) {
             this.cursorKeys = this.input.keyboard.createCursorKeys();
             this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
             this.leftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
@@ -69,19 +80,39 @@ export class Game extends Scene
             this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R).on('down', () => {
                 this.restartGame();
             });
-            
+
         }
-        else{
+        else {
             console.log('no keyboard input');
         }
 
-        this.bullets = this.physics.add.group();
-        this.enemies = this.physics.add.group();
-        this.enemyBullets = this.physics.add.group();
+        this.enemyBullets = this.physics.add.group({
+            classType: Bullet,
+            runChildUpdate: true,
+            createCallback: (bullet) => {
+                (bullet as Bullet).init();
+            },
+            quantity: 5,
+            maxSize: 5,
+        });
+
+        this.enemies = this.physics.add.group({
+            classType: Enemy,
+            defaultKey: 'sprites',
+            defaultFrame: 'ufoRed.png',
+            runChildUpdate: true,
+            createCallback: (enemy) => {
+                (enemy as Enemy).init(this.enemyBullets);
+            }
+        });
+
+
+        const groupUtils = new GroupUtils();
+        groupUtils.preallocateGroup(this.enemyBullets, 5);
 
         this.physics.add.collider(this.bullets, this.enemies, (bullet, enemy) => {
-            bullet.destroy();
-            enemy.destroy();
+            (enemy as Enemy).disable();
+            (bullet as Bullet).disable();
             this.playerScore++;
             console.log("Score: " + this.playerScore);
         });
@@ -89,10 +120,12 @@ export class Game extends Scene
         this.physics.add.collider(this.enemyBullets, this.player, (enemyBullet, player) => {
             enemyBullet.destroy();
             player.destroy();
+            this.scene.restart();
         });
-        if(!this.anims.exists('ufoShoot')){
+
+        if (!this.anims.exists('ufoShoot')) {
             this.anims.create({
-                key:'ufoShoot',
+                key: 'ufoShoot',
                 frames: [
                     { key: 'sprites', frame: 'ufoRed.png' },
                     { key: 'sprites', frame: 'ufoRed-shoot2.png' },
@@ -113,97 +146,58 @@ export class Game extends Scene
         this.lastShotTime = 0;
     }
 
-    private restartGame(){
+    private restartGame() {
         this.scene.restart();
     }
 
-    private selectPlayerShip(shipNumber: number){
+    private selectPlayerShip(shipNumber: number) {
         const playerShipsData = this.cache.json.get('playerShips') as PlayerShipsData;
         this.playerShipData = playerShipsData[shipNumber];
 
         this.player.setTexture('sprites', this.playerShipData.texture);
     }
 
-    private spawnEnemy(){
-        if(this.enemies.getLength() >= 5){
+    private spawnEnemy() {
+        if (this.enemies.getLength() >= 5) {
             return;
         }
-        const enemySize: number= 32;
-        let enemy: Phaser.GameObjects.Sprite = this.add.sprite(Phaser.Math.Between(enemySize, this.cameras.main.width - enemySize), -enemySize / 2, 'sprites', 'ufoRed.png').setDepth(100);
-        this.enemies.add(enemy);
-        let enemyBody: Phaser.Physics.Arcade.Body = enemy.body as Phaser.Physics.Arcade.Body;
-        enemyBody.allowGravity = false;
-        enemyBody.setFriction(0,0);
-        enemyBody.setVelocityY(256);
-
-        this.time.addEvent({
-            delay: Phaser.Math.Between(800, 2000),
-            callback: () => {
-                if (enemy.active){
-                    enemy.play('ufoShoot');
-                    enemy.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-                        enemy.setTexture('sprites', 'ufoRed.png');
-                        let bullet: Phaser.GameObjects.Rectangle = this.add.rectangle(enemy.x, enemy.y, 4, 13, 0xC1292E).setOrigin(0.5);
-                        this.enemyBullets.add(bullet);
-                        let bulletBody: Phaser.Physics.Arcade.Body = bullet.body as Phaser.Physics.Arcade.Body;
-                        bulletBody.allowGravity = false;
-                        bulletBody.setFriction(0,0);
-                        bulletBody.setVelocityY(512);
-                        this.sound.play('sfx_laser2');
-                    });
-                }
-            },
-            callbackScope: this,
-            loop: true,
-        });
+        const enemy = (this.enemies.get() as Enemy);
+        if (enemy) {
+            enemy.enable(
+                Phaser.Math.Between(0, this.cameras.main.width),
+                0
+            );
+        }
     }
-    
 
-    update(_timeSinceLaunch: number, deltaTime: number)
-    {
+
+    update(_timeSinceLaunch: number, deltaTime: number) {
 
         this.bg.tilePositionY -= 0.1 * deltaTime;
         this.planet.y += 0.40 * deltaTime;
-        if(this.leftKey.isDown){
-            this.player.x -= this.playerShipData.movementSpeed * deltaTime;
-            this.player.angle = Phaser.Math.Linear(this.player.angle, -105, 0.1);
-        }
-        else if(this.rightKey.isDown){
-            this.player.x += this.playerShipData.movementSpeed * deltaTime;
-            this.player.angle = Phaser.Math.Linear(this.player.angle, -75, 0.1);
-        }
-        else {
-            this.player.angle = Phaser.Math.Linear(this.player.angle, -90, 0.1);
-        }
-
-        if( this.player.active && this.spaceKey.isDown && _timeSinceLaunch - this.lastShotTime > this.playerRateOfFire * 1000){
-            let bullet: Phaser.GameObjects.Rectangle = this.add.rectangle(this.player.x, this.player.y - this.player.displayHeight / 2, 4, 13, 0xFDFFFC).setOrigin(0.5);
-            this.bullets.add(bullet);
-            let bulletBody: Phaser.Physics.Arcade.Body = bullet.body as Phaser.Physics.Arcade.Body;
-            bulletBody.allowGravity = false;
-            bulletBody.setFriction(0,0);
-            bulletBody.setVelocityY(-1024);
-
-            this.lastShotTime = _timeSinceLaunch;
-            this.sound.play('sfx_laser1');
-        }
+        // if (this.leftKey.isDown) {
+        //     this.player.x -= this.playerShipData.movementSpeed * deltaTime;
+        //     this.player.angle = Phaser.Math.Linear(this.player.angle, -105, 0.1);
+        // }
+        // else if (this.rightKey.isDown) {
+        //     this.player.x += this.playerShipData.movementSpeed * deltaTime;
+        //     this.player.angle = Phaser.Math.Linear(this.player.angle, -75, 0.1);
+        // }
+        // else {
+        //     this.player.angle = Phaser.Math.Linear(this.player.angle, -90, 0.1);
+        // }
 
         this.player.x = Phaser.Math.Clamp(this.player.x, this.player.displayWidth / 2, this.cameras.main.width - this.player.displayWidth / 2);
         this.player.y = Phaser.Math.Clamp(this.player.y, this.player.displayHeight / 2, this.cameras.main.height - this.player.displayHeight / 2);
 
         this.bullets.getChildren().forEach(bullet => {
-            if ((bullet as GameObjects.Rectangle).y < -(bullet as GameObjects.Rectangle).displayHeight){
+            if ((bullet as Bullet).y < -(bullet as Bullet).displayHeight) {
                 bullet.destroy();
             }
         });
         this.enemies.getChildren().forEach(enemy => {
-            if ((enemy as GameObjects.Rectangle).y >= this.cameras.main.height + (enemy as GameObjects.Rectangle).displayHeight){
+            if ((enemy as GameObjects.Rectangle).y >= this.cameras.main.height + (enemy as GameObjects.Rectangle).displayHeight) {
                 enemy.destroy();
-            }
-        });
-        this.enemyBullets.getChildren().forEach(bullet => {
-            if ((bullet as GameObjects.Rectangle).y > this.cameras.main.height + (bullet as GameObjects.Rectangle).displayHeight) {
-                bullet.destroy();
             }
         });
     }

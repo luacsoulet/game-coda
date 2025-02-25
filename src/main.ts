@@ -1,5 +1,5 @@
 import { Game as MainGame } from './scenes/MainGameScene';
-import { AUTO, Game, Scale,Types } from 'phaser';
+import { AUTO, Game, Scale, Types } from 'phaser';
 
 //  Find out more information about the Game Config at:
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
@@ -16,10 +16,10 @@ const config: Types.Core.GameConfig = {
     physics: {
         default: 'arcade',
         arcade: {
-            debug: false
+            debug: true
         }
     },
-    fps:{forceSetTimeOut: true, target: 60},
+    fps: { forceSetTimeOut: true, target: 60 },
     audio: {
         noAudio: true
     },
