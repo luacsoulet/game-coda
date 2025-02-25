@@ -3,25 +3,21 @@ import { Bullet } from '../entities/Bullet';
 import { GroupUtils } from '../utils/GroupUtils';
 import { Enemy } from '../entities/Enemy';
 import { Player } from '../entities/Player';
+import { GameDataKeys } from '../GameDataKeys';
 
-export class Game extends Scene {
+export class MainGameScene extends Scene {
     private player: Phaser.GameObjects.Image;
     private playerShipData: PlayerShipData;
-    private cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
-    private lastShotTime: number = 0;
-    private playerRateOfFire: number = 0.5;
-    private spaceKey: Phaser.Input.Keyboard.Key;
     private bullets: Phaser.Physics.Arcade.Group;
     private enemies: Phaser.Physics.Arcade.Group;
     private enemyBullets: Phaser.Physics.Arcade.Group;
-    private leftKey: Phaser.Input.Keyboard.Key;
-    private rightKey: Phaser.Input.Keyboard.Key;
-    private playerScore: number = 0;
     private bg: Phaser.GameObjects.TileSprite;
     private planet: Phaser.GameObjects.Image;
     private planet2: Phaser.GameObjects.Image;
+    private scoreText: Phaser.GameObjects.Text;
+
     constructor() {
-        super('Game');
+        super('MainGameScene');
     }
 
 
@@ -66,10 +62,6 @@ export class Game extends Scene {
         this.physics.add.existing(this.player);
 
         if (this.input.keyboard) {
-            this.cursorKeys = this.input.keyboard.createCursorKeys();
-            this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-            this.leftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
-            this.rightKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
 
             this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE).on('down', () => {
                 this.selectPlayerShip(1);
@@ -116,20 +108,16 @@ export class Game extends Scene {
             (bullet, enemy) => {
                 (enemy as Enemy).disable();
                 (bullet as Bullet).disable();
-                this.playerScore++;
-                console.log("Score: " + this.playerScore);
+                this.registry.inc(GameDataKeys.PlayerScore, 1);
             }, (bullet, enemy) => {
                 (enemy as Enemy).disable();
                 (bullet as Bullet).disable();
-                console.log("Score: " + this.playerScore, "process callback");
-            },
-
-        );
+            });
 
         this.physics.add.collider(this.enemyBullets, this.player, (enemyBullet, player) => {
             enemyBullet.destroy();
             player.destroy();
-            this.scene.restart();
+            this.restartGame();
         });
 
         if (!this.anims.exists('ufoShoot')) {
@@ -151,12 +139,20 @@ export class Game extends Scene {
             loop: true,
         });
 
-        this.playerScore = 0;
-        this.lastShotTime = 0;
+
+        this.add.rectangle(this.cameras.main.centerX, 32, this.cameras.main.width / 5, 140, 0x000000, 0.5);
+        this.add.text(this.cameras.main.centerX, 32, 'SCORE', { fontSize: '32px', align: 'center', color: '#fff' }).setOrigin(0.5);
+        this.scoreText = this.add.text(this.cameras.main.centerX, 72, '0', { fontSize: '32px', align: 'center', color: '#fff' }).setOrigin(0.5);
+
+        this.registry.set<number>(GameDataKeys.PlayerScore, 0);
+        this.registry.events.on('changedata-' + GameDataKeys.PlayerScore, (_: any, value: number) => {
+            this.scoreText.setText(value.toString());
+        });
     }
 
     private restartGame() {
-        this.scene.restart();
+        // this.data.events.removeAllListeners();
+        this.scene.start('GameOverScene');
     }
 
     private selectPlayerShip(shipNumber: number) {

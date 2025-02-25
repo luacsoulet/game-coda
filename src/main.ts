@@ -1,5 +1,7 @@
-import { Game as MainGame } from './scenes/MainGameScene';
+import { MainGameScene } from './scenes/MainGameScene';
 import { AUTO, Game, Scale, Types } from 'phaser';
+import { MainMenuScene } from './scenes/MainMenuScene';
+import { GameOverScene } from './scenes/GameOverScene';
 
 //  Find out more information about the Game Config at:
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
@@ -24,7 +26,9 @@ const config: Types.Core.GameConfig = {
         noAudio: true
     },
     scene: [
-        MainGame
+        MainMenuScene,
+        MainGameScene,
+        GameOverScene
     ]
 };
 
