@@ -25,10 +25,13 @@ export class Player extends Entity {
     }
 
     private selectPlayerShip(playerShipId: number) {
+
         const playerShipsData = this.scene.cache.json.get('playerShips') as PlayerShipData[];
         this.playerShipData = playerShipsData[playerShipId];
-
         this.setTexture('sprites', this.playerShipData.texture);
+
+        this.arcadeBody.setCircle(this.playerShipData.body.radius, this.playerShipData.body.offSetX, this.playerShipData.body.offSetY);
+        this.arcadeBody.updateCenter();
     }
 
     preUpdate(timeSinceLaunch: number, deltaTime: number) {

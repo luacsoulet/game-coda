@@ -8,6 +8,10 @@ export class Enemy extends Entity {
     public init(bulletsGroup: Phaser.Physics.Arcade.Group) {
         this.angle = -90;
 
+        // Configurer le corps circulaire
+        const body = this.body as Phaser.Physics.Arcade.Body;
+        body.setCircle(this.displayWidth / 2);
+
         this.addComponent(new WeaponComponent(bulletsGroup, this.scene.sound.add('sfx_laser2'), 4, 12, 512, 0xC1292E));
 
         this.shootTimerConfig = {

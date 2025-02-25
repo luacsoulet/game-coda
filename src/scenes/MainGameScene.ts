@@ -3,6 +3,7 @@ import { Bullet } from '../entities/Bullet';
 import { GroupUtils } from '../utils/GroupUtils';
 import { Enemy } from '../entities/Enemy';
 import { Player } from '../entities/Player';
+
 export class Game extends Scene {
     private player: Phaser.GameObjects.Image;
     private playerShipData: PlayerShipData;
@@ -18,7 +19,7 @@ export class Game extends Scene {
     private playerScore: number = 0;
     private bg: Phaser.GameObjects.TileSprite;
     private planet: Phaser.GameObjects.Image;
-
+    private planet2: Phaser.GameObjects.Image;
     constructor() {
         super('Game');
     }
@@ -28,7 +29,10 @@ export class Game extends Scene {
         this.load.setPath('assets');
 
         this.load.image('bg', 'Background/bg.png');
+
         this.load.image('planet', 'Planets/planet01.png');
+        this.load.image('planet2', 'Planets/planet09.png');
+
         this.load.atlas('sprites', 'Spritesheet/gameSprites.png', 'Spritesheet/gameSprites.json');
 
         this.load.audio('sfx_laser1', 'Sounds/sfx_laser1.ogg');
@@ -40,6 +44,8 @@ export class Game extends Scene {
     create() {
 
         this.bg = this.add.tileSprite(0, 0, this.cameras.main.width, this.cameras.main.height, 'bg').setOrigin(0).setTileScale(2);
+
+        this.planet2 = this.add.image(100, -212, 'planet2').setOrigin(0).setScale(0.1);
         this.planet = this.add.image(0, -512, 'planet').setOrigin(0);
 
         const playerShipsData = this.cache.json.get('playerShips') as PlayerShipsData;
@@ -58,9 +64,6 @@ export class Game extends Scene {
 
         this.player = new Player(this, this.cameras.main.centerX, this.cameras.main.height - 128, 'sprites', this.bullets).setOrigin(0.5);
         this.physics.add.existing(this.player);
-
-        const playerBody = this.player.body as Phaser.Physics.Arcade.Body;
-        playerBody.setOffset(-1, -2);
 
         if (this.input.keyboard) {
             this.cursorKeys = this.input.keyboard.createCursorKeys();
@@ -106,16 +109,22 @@ export class Game extends Scene {
             }
         });
 
-
         const groupUtils = new GroupUtils();
         groupUtils.preallocateGroup(this.enemyBullets, 5);
 
-        this.physics.add.collider(this.bullets, this.enemies, (bullet, enemy) => {
-            (enemy as Enemy).disable();
-            (bullet as Bullet).disable();
-            this.playerScore++;
-            console.log("Score: " + this.playerScore);
-        });
+        this.physics.add.collider(this.bullets, this.enemies,
+            (bullet, enemy) => {
+                (enemy as Enemy).disable();
+                (bullet as Bullet).disable();
+                this.playerScore++;
+                console.log("Score: " + this.playerScore);
+            }, (bullet, enemy) => {
+                (enemy as Enemy).disable();
+                (bullet as Bullet).disable();
+                console.log("Score: " + this.playerScore, "process callback");
+            },
+
+        );
 
         this.physics.add.collider(this.enemyBullets, this.player, (enemyBullet, player) => {
             enemyBullet.destroy();
@@ -175,17 +184,7 @@ export class Game extends Scene {
 
         this.bg.tilePositionY -= 0.1 * deltaTime;
         this.planet.y += 0.40 * deltaTime;
-        // if (this.leftKey.isDown) {
-        //     this.player.x -= this.playerShipData.movementSpeed * deltaTime;
-        //     this.player.angle = Phaser.Math.Linear(this.player.angle, -105, 0.1);
-        // }
-        // else if (this.rightKey.isDown) {
-        //     this.player.x += this.playerShipData.movementSpeed * deltaTime;
-        //     this.player.angle = Phaser.Math.Linear(this.player.angle, -75, 0.1);
-        // }
-        // else {
-        //     this.player.angle = Phaser.Math.Linear(this.player.angle, -90, 0.1);
-        // }
+        this.planet2.y += 0.05 * deltaTime;
 
         this.player.x = Phaser.Math.Clamp(this.player.x, this.player.displayWidth / 2, this.cameras.main.width - this.player.displayWidth / 2);
         this.player.y = Phaser.Math.Clamp(this.player.y, this.player.displayHeight / 2, this.cameras.main.height - this.player.displayHeight / 2);

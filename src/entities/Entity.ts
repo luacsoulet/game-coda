@@ -1,14 +1,15 @@
 export class Entity extends Phaser.Physics.Arcade.Sprite {
-
     public arcadeBody: Phaser.Physics.Arcade.Body;
 
     private components: IComponent[] = [];
 
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, frame?: string) {
+
         super(scene, x, y, texture, frame);
 
         scene.add.existing(this);
         scene.physics.add.existing(this);
+        this.arcadeBody = this.body as Phaser.Physics.Arcade.Body;
     }
 
     // public init() {
