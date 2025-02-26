@@ -4,71 +4,134 @@
 			"image": "gameSprites",
 			"format": "RGBA8888",
 			"size": {
-				"w": 166,
-				"h": 400
+				"w": 184,
+				"h": 520
 			},
 			"scale": 1,
 			"frames": [
 				{
 					"filename": "playerShip2_blue.png",
 					"rotated": false,
-					"trimmed": false,
+					"trimmed": true,
 					"sourceSize": {
-						"w": 75,
+						"w": 112,
 						"h": 112
 					},
 					"spriteSourceSize": {
-						"x": 0,
+						"x": 15,
 						"y": 0,
-						"w": 75,
+						"w": 93,
 						"h": 112
 					},
 					"frame": {
 						"x": 0,
 						"y": 0,
-						"w": 75,
+						"w": 93,
+						"h": 112
+					}
+				},
+				{
+					"filename": "playerShip2_blue_boost.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 112,
+						"h": 112
+					},
+					"spriteSourceSize": {
+						"x": 15,
+						"y": 0,
+						"w": 93,
+						"h": 112
+					},
+					"frame": {
+						"x": 0,
+						"y": 112,
+						"w": 93,
 						"h": 112
 					}
 				},
 				{
 					"filename": "playerShip1_blue.png",
 					"rotated": false,
-					"trimmed": false,
+					"trimmed": true,
 					"sourceSize": {
-						"w": 75,
+						"w": 99,
 						"h": 99
 					},
 					"spriteSourceSize": {
-						"x": 0,
+						"x": 9,
 						"y": 0,
-						"w": 75,
+						"w": 90,
 						"h": 99
 					},
 					"frame": {
 						"x": 0,
-						"y": 112,
-						"w": 75,
+						"y": 224,
+						"w": 90,
+						"h": 99
+					}
+				},
+				{
+					"filename": "playerShip1_blue_boost.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 99,
+						"h": 99
+					},
+					"spriteSourceSize": {
+						"x": 9,
+						"y": 0,
+						"w": 90,
+						"h": 99
+					},
+					"frame": {
+						"x": 0,
+						"y": 323,
+						"w": 90,
 						"h": 99
 					}
 				},
 				{
 					"filename": "playerShip3_blue.png",
 					"rotated": false,
-					"trimmed": false,
+					"trimmed": true,
 					"sourceSize": {
-						"w": 75,
+						"w": 98,
 						"h": 98
 					},
 					"spriteSourceSize": {
-						"x": 0,
+						"x": 6,
 						"y": 0,
-						"w": 75,
+						"w": 91,
 						"h": 98
 					},
 					"frame": {
 						"x": 0,
-						"y": 211,
-						"w": 75,
+						"y": 422,
+						"w": 91,
+						"h": 98
+					}
+				},
+				{
+					"filename": "playerShip3_blue_boost.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 98,
+						"h": 98
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 0,
+						"w": 91,
+						"h": 98
+					},
+					"frame": {
+						"x": 90,
+						"y": 224,
+						"w": 91,
 						"h": 98
 					}
 				},
@@ -87,8 +150,8 @@
 						"h": 91
 					},
 					"frame": {
-						"x": 0,
-						"y": 309,
+						"x": 90,
+						"y": 322,
 						"w": 91,
 						"h": 91
 					}
@@ -108,7 +171,7 @@
 						"h": 91
 					},
 					"frame": {
-						"x": 75,
+						"x": 93,
 						"y": 0,
 						"w": 91,
 						"h": 91
@@ -129,7 +192,7 @@
 						"h": 91
 					},
 					"frame": {
-						"x": 75,
+						"x": 93,
 						"y": 91,
 						"w": 91,
 						"h": 91

@@ -1,7 +1,10 @@
 {
     "1": {
         "movementSpeed": 0.6,
-        "texture": "playerShip1_blue.png",
+        "texture": [
+            "playerShip1_blue.png",
+            "playerShip1_blue_boost.png"
+        ],
         "body": {
             "radius": 42,
             "offSetX": -4,
@@ -10,7 +13,10 @@
     },
     "2": {
         "movementSpeed": 0.9,
-        "texture": "playerShip2_blue.png",
+        "texture": [
+            "playerShip2_blue.png",
+            "playerShip2_blue_boost.png"
+        ],
         "body": {
             "radius": 42,
             "offSetX": -4,
@@ -19,7 +25,10 @@
     },
     "3": {
         "movementSpeed": 1.2,
-        "texture": "playerShip3_blue.png",
+        "texture": [
+            "playerShip3_blue.png",
+            "playerShip3_blue_boost.png"
+        ],
         "body": {
             "radius": 42,
             "offSetX": -4,

@@ -33,13 +33,25 @@ export class Player extends Entity {
         const playerShipsData = this.scene.cache.json.get('playerShips') as PlayerShipData[];
         this.playerShipData = playerShipsData[playerShipId];
 
-        this.setTexture('sprites', this.playerShipData.texture);
+        this.setTexture('sprites', this.playerShipData.texture[0]);
 
 
         this.arcadeBody.setCircle(this.playerShipData.body.radius, this.playerShipData.body.offSetX, this.playerShipData.body.offSetY);
         this.arcadeBody.updateCenter();
 
         this.getComponent(MovementComponent)?.setSpeed(this.playerShipData.movementSpeed);
+
+        this.anims.create({
+            key: 'playerShipIdle',
+            frames: [
+                { key: 'sprites', frame: this.playerShipData.texture[0] },
+                { key: 'sprites', frame: this.playerShipData.texture[1] },
+            ],
+            frameRate: 30,
+            repeat: -1,
+        });
+
+        this.play('playerShipIdle');
     }
 
     preUpdate(timeSinceLaunch: number, deltaTime: number) {
