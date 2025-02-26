@@ -9,6 +9,9 @@ export class Player extends Entity {
     private lastShotTime: number;
     private cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
 
+    preload() {
+        this.scene.load.atlas('sprites', 'Spritesheet/gameSprites.png', 'Spritesheet/gameSprites.json');
+    }
 
     public constructor(scene: Phaser.Scene, x: number, y: number, texture: string, bullets: Phaser.Physics.Arcade.Group, frame?: string) {
         super(scene, x, y, texture, frame);
@@ -26,6 +29,36 @@ export class Player extends Entity {
 
         this.addComponent(new WeaponComponent(bullets, scene.sound.add('sfx_laser1'), 4, 12, 1024, 0xFFFFFF));
         this.selectPlayerShip(1);
+
+        this.anims.create({
+            key: 'playerShipIdle_1',
+            frames: [
+                { key: 'sprites', frame: 'playerShip1_blue.png' },
+                { key: 'sprites', frame: 'playerShip1_blue_boost.png' },
+            ],
+            frameRate: 30,
+            repeat: -1,
+        });
+
+        this.anims.create({
+            key: 'playerShipIdle_2',
+            frames: [
+                { key: 'sprites', frame: 'playerShip2_blue.png' },
+                { key: 'sprites', frame: 'playerShip2_blue_boost.png' },
+            ],
+            frameRate: 30,
+            repeat: -1,
+        });
+
+        this.anims.create({
+            key: 'playerShipIdle_3',
+            frames: [
+                { key: 'sprites', frame: 'playerShip3_blue.png' },
+                { key: 'sprites', frame: 'playerShip3_blue_boost.png' },
+            ],
+            frameRate: 30,
+            repeat: -1,
+        });
     }
 
     public selectPlayerShip(playerShipId: number) {
@@ -41,18 +74,9 @@ export class Player extends Entity {
 
         this.getComponent(MovementComponent)?.setSpeed(this.playerShipData.movementSpeed);
 
-        this.anims.create({
-            key: 'playerShipIdle',
-            frames: [
-                { key: 'sprites', frame: this.playerShipData.texture[0] },
-                { key: 'sprites', frame: this.playerShipData.texture[1] },
-            ],
-            frameRate: 30,
-            repeat: -1,
-        });
-
-        this.play('playerShipIdle');
+        this.play('playerShipIdle_' + playerShipId);
     }
+
 
     preUpdate(timeSinceLaunch: number, deltaTime: number) {
         super.preUpdate(timeSinceLaunch, deltaTime);

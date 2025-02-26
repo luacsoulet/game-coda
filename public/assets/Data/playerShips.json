@@ -6,9 +6,9 @@
             "playerShip1_blue_boost.png"
         ],
         "body": {
-            "radius": 42,
-            "offSetX": -4,
-            "offSetY": 12
+            "radius": 48,
+            "offSetX": 0,
+            "offSetY": 0
         }
     },
     "2": {
@@ -18,9 +18,9 @@
             "playerShip2_blue_boost.png"
         ],
         "body": {
-            "radius": 42,
-            "offSetX": -4,
-            "offSetY": 12
+            "radius": 54,
+            "offSetX": 2,
+            "offSetY": 2
         }
     },
     "3": {
@@ -30,9 +30,9 @@
             "playerShip3_blue_boost.png"
         ],
         "body": {
-            "radius": 42,
-            "offSetX": -4,
-            "offSetY": 12
+            "radius": 48,
+            "offSetX": 0,
+            "offSetY": 0
         }
     }
 }
