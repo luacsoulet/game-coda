@@ -1,4 +1,3 @@
-import { Physics } from 'phaser';
 
 export class Bullet extends Phaser.GameObjects.Rectangle {
 
