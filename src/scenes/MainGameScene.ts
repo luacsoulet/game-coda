@@ -4,9 +4,10 @@ import { GroupUtils } from '../utils/GroupUtils';
 import { Enemy } from '../entities/Enemy';
 import { Player } from '../entities/Player';
 import { GameDataKeys } from '../GameDataKeys';
+import { HealthComponent } from '../components/HealthComponent';
 
 export class MainGameScene extends Scene {
-    private player: Phaser.GameObjects.Image;
+    private player: Player;
     private playerShipData: PlayerShipData;
     private bullets: Phaser.Physics.Arcade.Group;
     private enemies: Phaser.Physics.Arcade.Group;
@@ -25,7 +26,7 @@ export class MainGameScene extends Scene {
 
         const width: number = this.cameras.main.width;
         // const height: number = this.cameras.main.height;
-        const x: number = this.cameras.main.centerX;
+        // const x: number = this.cameras.main.centerX;
         const y: number = this.cameras.main.centerY;
 
         const progressBar = this.add.graphics();
@@ -89,13 +90,13 @@ export class MainGameScene extends Scene {
         if (this.input.keyboard) {
 
             this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE).on('down', () => {
-                this.selectPlayerShip(1);
+                this.player.selectPlayerShip(1);
             });
             this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO).on('down', () => {
-                this.selectPlayerShip(2);
+                this.player.selectPlayerShip(2);
             });
             this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE).on('down', () => {
-                this.selectPlayerShip(3);
+                this.player.selectPlayerShip(3);
             });
             this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R).on('down', () => {
                 this.restartGame();
@@ -131,8 +132,8 @@ export class MainGameScene extends Scene {
 
         this.physics.add.collider(this.bullets, this.enemies,
             (bullet, enemy) => {
-                (enemy as Enemy).disable();
                 (bullet as Bullet).disable();
+                (enemy as Enemy).getComponent(HealthComponent)?.inc(-1);
                 this.registry.inc(GameDataKeys.PlayerScore, 1);
             }, (bullet, enemy) => {
                 (enemy as Enemy).disable();
@@ -140,8 +141,12 @@ export class MainGameScene extends Scene {
             });
 
         this.physics.add.collider(this.enemyBullets, this.player, (enemyBullet, player) => {
-            enemyBullet.destroy();
-            player.destroy();
+            this.restartGame();
+        });
+
+        this.physics.add.collider(this.enemies, this.player, (enemy, player) => {
+            const enemyHealth = (enemy as Enemy).getComponent(HealthComponent);
+            enemyHealth?.inc(-enemyHealth?.getMax());
             this.restartGame();
         });
 
@@ -180,15 +185,8 @@ export class MainGameScene extends Scene {
         this.scene.start('GameOverScene');
     }
 
-    private selectPlayerShip(shipNumber: number) {
-        const playerShipsData = this.cache.json.get('playerShips') as PlayerShipsData;
-        this.playerShipData = playerShipsData[shipNumber];
-
-        this.player.setTexture('sprites', this.playerShipData.texture);
-    }
-
     private spawnEnemy() {
-        if (this.enemies.getLength() >= 5) {
+        if (this.enemies.countActive() >= 5) {
             return;
         }
         const enemy = (this.enemies.get() as Enemy);
@@ -206,9 +204,6 @@ export class MainGameScene extends Scene {
         this.bg.tilePositionY -= 0.1 * deltaTime;
         this.planet.y += 0.40 * deltaTime;
         this.planet2.y += 0.05 * deltaTime;
-
-        this.player.x = Phaser.Math.Clamp(this.player.x, this.player.displayWidth / 2, this.cameras.main.width - this.player.displayWidth / 2);
-        this.player.y = Phaser.Math.Clamp(this.player.y, this.player.displayHeight / 2, this.cameras.main.height - this.player.displayHeight / 2);
 
         this.bullets.getChildren().forEach(bullet => {
             if ((bullet as Bullet).y < -(bullet as Bullet).displayHeight) {

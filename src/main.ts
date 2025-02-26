@@ -26,7 +26,7 @@ const config: Types.Core.GameConfig = {
         noAudio: true
     },
     scene: [
-        // MainMenuScene,
+        MainMenuScene,
         MainGameScene,
         GameOverScene
     ]
