@@ -1,6 +1,7 @@
 import { Entity } from "./Entity";
 import { WeaponComponent } from "../components/WeaponComponent";
 import { MovementComponent } from "../components/MovementComponent";
+import { HealthComponent } from "../components/HealthComponent";
 
 export class Player extends Entity {
     private readonly rateOfFire: number;
@@ -11,10 +12,13 @@ export class Player extends Entity {
 
     public constructor(scene: Phaser.Scene, x: number, y: number, texture: string, bullets: Phaser.Physics.Arcade.Group, frame?: string) {
         super(scene, x, y, texture, frame);
+
+        this.addComponent(new MovementComponent());
+        this.addComponent(new HealthComponent(1));
+
         this.rateOfFire = 0.5;
         this.lastShotTime = 0;
         this.angle = -90;
-        this.addComponent(new MovementComponent());
 
         if (this.scene.input.keyboard) {
             this.cursorKeys = this.scene.input.keyboard.createCursorKeys();

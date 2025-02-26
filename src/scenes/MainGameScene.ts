@@ -8,7 +8,6 @@ import { HealthComponent } from '../components/HealthComponent';
 
 export class MainGameScene extends Scene {
     private player: Player;
-    private playerShipData: PlayerShipData;
     private bullets: Phaser.Physics.Arcade.Group;
     private enemies: Phaser.Physics.Arcade.Group;
     private enemyBullets: Phaser.Physics.Arcade.Group;
@@ -70,9 +69,6 @@ export class MainGameScene extends Scene {
         this.planet2 = this.add.image(100, -212, 'planet2').setOrigin(0).setScale(0.1);
         this.planet = this.add.image(0, -512, 'planet').setOrigin(0);
 
-        const playerShipsData = this.cache.json.get('playerShips') as PlayerShipsData;
-        this.playerShipData = playerShipsData["1"];
-
         this.bullets = this.physics.add.group({
             classType: Bullet,
             runChildUpdate: true,
@@ -86,6 +82,8 @@ export class MainGameScene extends Scene {
 
         this.player = new Player(this, this.cameras.main.centerX, this.cameras.main.height - 128, 'sprites', this.bullets).setOrigin(0.5);
         this.physics.add.existing(this.player);
+
+        this.player.getComponent(HealthComponent)?.once("death", this.restartGame, this);
 
         if (this.input.keyboard) {
 
@@ -136,18 +134,22 @@ export class MainGameScene extends Scene {
                 (enemy as Enemy).getComponent(HealthComponent)?.inc(-1);
                 this.registry.inc(GameDataKeys.PlayerScore, 1);
             }, (bullet, enemy) => {
-                (enemy as Enemy).disable();
+                (enemy as Enemy).getComponent(HealthComponent)?.inc(-1);
                 (bullet as Bullet).disable();
             });
 
-        this.physics.add.collider(this.enemyBullets, this.player, (enemyBullet, player) => {
-            this.restartGame();
+        this.physics.add.collider(this.player, this.enemyBullets, (player, enemyBullet) => {
+            (enemyBullet as Bullet).disable();
+            (player as Player).getComponent(HealthComponent)?.inc(-1);
         });
 
-        this.physics.add.collider(this.enemies, this.player, (enemy, player) => {
+        this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
+
             const enemyHealth = (enemy as Enemy).getComponent(HealthComponent);
+            const playerHealth = (player as Player).getComponent(HealthComponent);
+
             enemyHealth?.inc(-enemyHealth?.getMax());
-            this.restartGame();
+            playerHealth?.inc(-1);
         });
 
         if (!this.anims.exists('ufoShoot')) {
