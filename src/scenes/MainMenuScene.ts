@@ -13,6 +13,10 @@ export class MainMenuScene extends Phaser.Scene {
     private angle: number = 0;
     private cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
     private selectedShip: number = 1;
+    private orbitCenters: Map<Phaser.GameObjects.Sprite, [number, number]> = new Map();
+    private orbitAngles: Map<Phaser.GameObjects.Sprite, number> = new Map();
+    private orbitTweens: Map<Phaser.GameObjects.Sprite, Phaser.Tweens.Tween> = new Map();
+    private orbitRadius: number = 28;
 
     preload() {
         this.load.setPath('assets');
@@ -70,9 +74,13 @@ export class MainMenuScene extends Phaser.Scene {
         this.highlightSelectedShip();
     }
 
-    update(_timeSinceLaunch: number, deltaTime: number) {
-        this.bg.tilePositionY -= 0.1 * deltaTime;
+    update(time: number, delta: number) {
+        this.bg.tilePositionY -= 0.1 * delta;
 
+        // Mettre à jour les positions des vaisseaux en orbite
+        this.updateOrbits();
+
+        // Gestion des touches
         if (Phaser.Input.Keyboard.JustDown(this.cursorKeys.left)) {
             this.selectedShip = this.selectedShip === 1 ? 3 : this.selectedShip - 1;
             this.registry.set(GameDataKeys.SelectedShip, this.selectedShip);
@@ -86,147 +94,107 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     private highlightSelectedShip() {
-        this.tweens.killAll();
-
-        this.playerShip1.setScale(1);
-        this.playerShip2.setScale(1);
-        this.playerShip3.setScale(1);
-
         const centerX = this.cameras.main.centerX;
         const centerY = this.cameras.main.centerY;
         const offsetX = 200;
         const offsetY = 228;
         const duration = 500;
 
-        this.angle = 0;
+        // Réinitialiser les échelles avec animation
+        [this.playerShip1, this.playerShip2, this.playerShip3].forEach((ship, index) => {
+            const isSelected = this.selectedShip === index + 1;
+            this.tweens.add({
+                targets: ship,
+                scale: isSelected ? 1.2 : 0.9,
+                duration: 300,
+                ease: 'Sine.easeInOut'
+            });
+        });
 
-        switch (this.selectedShip) {
-            case 1:
-                this.playerShip1.setScale(1.2);
-                this.tweens.add({
-                    targets: this.playerShip1,
-                    x: centerX,
-                    y: centerY,
-                    duration: duration,
-                    ease: 'Power2'
-                });
-                this.playerShip2.setScale(0.9);
-                this.tweens.add({
-                    targets: this.playerShip2,
-                    x: centerX + offsetX,
-                    y: centerY + offsetY,
-                    duration: duration,
-                    ease: 'Power2'
-                });
-                this.playerShip3.setScale(0.9);
-                this.tweens.add({
-                    targets: this.playerShip3,
-                    x: centerX - offsetX,
-                    y: centerY + offsetY,
-                    duration: duration,
-                    ease: 'Power2',
-                    onComplete: () => {
-                        this.addCircularMotions(
-                            [centerX, centerY],
-                            [centerX + offsetX, centerY + offsetY],
-                            [centerX - offsetX, centerY + offsetY]
-                        );
-                    }
-                });
-                break;
-            case 2:
-                this.playerShip2.setScale(1.2);
-                this.tweens.add({
-                    targets: this.playerShip2,
-                    x: centerX,
-                    y: centerY,
-                    duration: duration,
-                    ease: 'Power2'
-                });
-                this.playerShip1.setScale(0.9);
-                this.tweens.add({
-                    targets: this.playerShip1,
-                    x: centerX - offsetX,
-                    y: centerY + offsetY,
-                    duration: duration,
-                    ease: 'Power2'
-                });
-                this.playerShip3.setScale(0.9);
-                this.tweens.add({
-                    targets: this.playerShip3,
-                    x: centerX + offsetX,
-                    y: centerY + offsetY,
-                    duration: duration,
-                    ease: 'Power2',
-                    onComplete: () => {
-                        this.addCircularMotions(
-                            [centerX - offsetX, centerY + offsetY],
-                            [centerX, centerY],
-                            [centerX + offsetX, centerY + offsetY]
-                        );
-                    }
-                });
-                break;
-            case 3:
-                this.playerShip3.setScale(1.2);
-                this.tweens.add({
-                    targets: this.playerShip3,
-                    x: centerX,
-                    y: centerY,
-                    duration: duration,
-                    ease: 'Power2'
-                });
-                this.playerShip1.setScale(0.9);
-                this.tweens.add({
-                    targets: this.playerShip1,
-                    x: centerX - offsetX,
-                    y: centerY + offsetY,
-                    duration: duration,
-                    ease: 'Power2'
-                });
-                this.playerShip2.setScale(0.9);
-                this.tweens.add({
-                    targets: this.playerShip2,
-                    x: centerX + offsetX,
-                    y: centerY + offsetY,
-                    duration: duration,
-                    ease: 'Power2',
-                    onComplete: () => {
-                        this.addCircularMotions(
-                            [centerX - offsetX, centerY + offsetY],
-                            [centerX + offsetX, centerY + offsetY],
-                            [centerX, centerY]
-                        );
-                    }
-                });
-                break;
+        // Positions cibles pour chaque vaisseau selon la sélection
+        const centerPos: [number, number] = [centerX, centerY];
+        const leftPos: [number, number] = [centerX - offsetX, centerY + offsetY];
+        const rightPos: [number, number] = [centerX + offsetX, centerY + offsetY];
+
+        // Tableau des positions cibles pour chaque vaisseau
+        const targetPositions = [
+            [centerPos, rightPos, leftPos],   // Pour selectedShip = 1
+            [leftPos, centerPos, rightPos],   // Pour selectedShip = 2
+            [leftPos, rightPos, centerPos]    // Pour selectedShip = 3
+        ];
+
+        // Sélectionner le bon ensemble de positions
+        const positions = targetPositions[this.selectedShip - 1];
+        const ships = [this.playerShip1, this.playerShip2, this.playerShip3];
+
+        // Animer les centres d'orbite pour chaque vaisseau
+        ships.forEach((ship, index) => {
+            const currentCenter = this.orbitCenters.get(ship) || positions[index];
+            const centerObj = { x: currentCenter[0], y: currentCenter[1] };
+
+            this.tweens.add({
+                targets: centerObj,
+                x: positions[index][0],
+                y: positions[index][1],
+                duration: duration,
+                ease: 'Sine.easeInOut',
+                onUpdate: () => {
+                    this.orbitCenters.set(ship, [centerObj.x, centerObj.y]);
+                }
+            });
+        });
+
+        // Initialiser les animations d'orbite si nécessaire
+        if (!this.orbitAngles.has(this.playerShip1)) {
+            ships.forEach((ship, index) => {
+                this.orbitAngles.set(ship, 0);
+            });
+            this.startContinuousOrbits();
         }
     }
 
-    private addCircularMotions(ship1Pos: [number, number], ship2Pos: [number, number], ship3Pos: [number, number]) {
-        const radius = 28;
-        const ships = [
-            { sprite: this.playerShip1, position: ship1Pos, duration: 4000 },
-            { sprite: this.playerShip2, position: ship2Pos, duration: 3500 },
-            { sprite: this.playerShip3, position: ship3Pos, duration: 3000 }
-        ];
+    private startContinuousOrbits() {
+        // Créer des tweens pour animer les angles d'orbite
+        const createOrbitTween = (sprite: Phaser.GameObjects.Sprite, duration: number) => {
+            // Arrêter le tween existant s'il y en a un
+            if (this.orbitTweens.has(sprite)) {
+                this.orbitTweens.get(sprite)?.stop();
+            }
 
-        // Créer les animations circulaires pour chaque vaisseau
-        ships.forEach(ship => {
-            const angle = { value: 0 };
-
-            this.tweens.add({
-                targets: angle,
-                value: 360,
-                duration: ship.duration,
+            const tween = this.tweens.add({
+                targets: { angle: this.orbitAngles.get(sprite) || 0 },
+                angle: 360,
+                duration: duration,
                 repeat: -1,
                 ease: 'Linear',
-                onUpdate: () => {
-                    const radian = Phaser.Math.DegToRad(angle.value);
-                    ship.sprite.x = ship.position[0] + radius * Math.cos(radian);
-                    ship.sprite.y = ship.position[1] + radius * Math.sin(radian);
+                onUpdate: (tween) => {
+                    const target = tween.targets[0] as { angle: number };
+                    this.orbitAngles.set(sprite, target.angle % 360);
                 }
             });
+
+            this.orbitTweens.set(sprite, tween);
+        };
+
+        // Créer des tweens avec des durées différentes
+        createOrbitTween(this.playerShip1, 3000);
+        createOrbitTween(this.playerShip2, 3500);
+        createOrbitTween(this.playerShip3, 4000);
+    }
+
+    private updateOrbits() {
+        // Mettre à jour la position de chaque vaisseau en fonction de son angle d'orbite
+        this.orbitCenters.forEach((center, sprite) => {
+            const angle = this.orbitAngles.get(sprite) || 0;
+            const radian = Phaser.Math.DegToRad(angle);
+
+            // Calculer la position cible sur l'orbite
+            const targetX = center[0] + this.orbitRadius * Math.cos(radian);
+            const targetY = center[1] + this.orbitRadius * Math.sin(radian);
+
+            // Appliquer la position
+            sprite.x = targetX;
+            sprite.y = targetY;
         });
     }
 }
