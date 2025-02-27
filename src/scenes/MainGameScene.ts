@@ -122,7 +122,7 @@ export class MainGameScene extends Scene {
         const groupUtils = new GroupUtils();
         groupUtils.preallocateGroup(this.enemyBullets, 5);
 
-        this.physics.add.collider(this.bullets, this.enemies,
+        this.physics.add.overlap(this.bullets, this.enemies,
             (bullet, enemy) => {
                 (bullet as Bullet).disable();
                 (enemy as Enemy).getComponent(HealthComponent)?.inc(-1);
@@ -132,7 +132,7 @@ export class MainGameScene extends Scene {
                 (bullet as Bullet).disable();
             });
 
-        this.physics.add.collider(this.player, this.enemyBullets, (player, enemyBullet) => {
+        this.physics.add.overlap(this.player, this.enemyBullets, (player, enemyBullet) => {
             (enemyBullet as Bullet).disable();
             (player as Player).getComponent(HealthComponent)?.inc(-1);
         });
