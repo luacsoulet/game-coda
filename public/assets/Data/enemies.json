@@ -1,0 +1,95 @@
+{
+    "saucer": {
+        "health": 1,
+        "speed": 0.2,
+        "points": 1,
+        "textures": {
+            "default": "ufoRed",
+            "speed_1": "ufoRed-shoot2",
+            "speed_2": "ufoRed-shoot3"
+        },
+        "scale": 1,
+        "body": {
+            "radius": 45,
+            "offsetX": 0,
+            "offsetY": 0
+        },
+        "weapon": {
+            "damage": 1,
+            "fireRate": 3000,
+            "projectileSpeed": 400,
+            "projectileTexture": "laserRed05"
+        }
+    },
+    "swarm": {
+        "health": 2,
+        "speed": 0.15,
+        "points": 2,
+        "textures": {
+            "default": "enemyFleet_1",
+            "speed_1": "enemyFleet_2",
+            "speed_2": "enemyFleet_3"
+        },
+        "scale": 1,
+        "body": {
+            "radius": 18,
+            "offsetX": 18,
+            "offsetY": 20
+        },
+        "weapon": {
+            "damage": 1,
+            "fireRate": 2000,
+            "projectileSpeed": 500,
+            "projectileTexture": "laserRed05"
+        },
+        "formations": {
+            "line": {
+                "spacing": 80,
+                "count": 4,
+                "direction": "horizontal"
+            },
+            "circle": {
+                "radius": 120,
+                "count": 5,
+                "rotationSpeed": 0.4
+            },
+            "triangle": {
+                "size": 100,
+                "count": 4,
+                "rotationSpeed": 0.2
+            },
+            "square": {
+                "size": 100,
+                "count": 4,
+                "rotationSpeed": 0.3
+            },
+            "zigzag": {
+                "width": 200,
+                "height": 50,
+                "count": 5
+            }
+        }
+    },
+    "shooter": {
+        "health": 3,
+        "speed": 0.1,
+        "points": 2,
+        "textures": {
+            "default": "enemyRocket_1",
+            "speed_1": "enemyRocket_2",
+            "speed_2": "enemyRocket_2"
+        },
+        "scale": 1,
+        "body": {
+            "radius": 44,
+            "offsetX": 20,
+            "offsetY": 5
+        },
+        "weapon": {
+            "damage": 2,
+            "fireRate": 4000,
+            "projectileSpeed": 300,
+            "projectileTexture": "spaceMissiles_018"
+        }
+    }
+}
