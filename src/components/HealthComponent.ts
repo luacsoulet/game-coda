@@ -1,12 +1,17 @@
 export class HealthComponent extends Phaser.Events.EventEmitter implements IComponent {
 
     private value: number;
-    private readonly max: number;
+    private max: number;
 
     public constructor(value: number) {
         super();
         this.value = value;
         this.max = value;
+    }
+
+    public setHealth(health: number): void {
+        this.value = health;
+        this.max = health;
     }
 
     public getValue(): number {
