@@ -2,6 +2,7 @@ import { Entity } from "./Entity";
 import { WeaponComponent } from "../components/WeaponComponent";
 import { MovementComponent } from "../components/MovementComponent";
 import { HealthComponent } from "../components/HealthComponent";
+import { GameDataKeys } from "../GameDataKeys";
 
 export class Player extends Entity {
     private readonly rateOfFire: number;
@@ -28,7 +29,7 @@ export class Player extends Entity {
         }
 
         this.addComponent(new WeaponComponent(bullets, scene.sound.add('sfx_laser1'), 4, 12, 1024, 0xFFFFFF));
-        this.selectPlayerShip(1);
+        this.selectPlayerShip(this.scene.registry.get(GameDataKeys.SelectedShip));
 
         this.anims.create({
             key: 'playerShipIdle_1',
