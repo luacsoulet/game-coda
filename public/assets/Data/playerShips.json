@@ -1,8 +1,8 @@
 {
     "1": {
-        "movementSpeed": 0.6,
+        "movementSpeed": 0.9,
         "health": 5,
-        "shootingRate": 0.9,
+        "shootingRate": 0.5,
         "texture": [
             "playerShip1_blue.png",
             "playerShip1_blue_boost.png"
@@ -14,7 +14,7 @@
         }
     },
     "2": {
-        "movementSpeed": 0.9,
+        "movementSpeed": 0.6,
         "health": 3,
         "shootingRate": 0.7,
         "texture": [
@@ -30,7 +30,7 @@
     "3": {
         "movementSpeed": 1.2,
         "health": 1,
-        "shootingRate": 0.5,
+        "shootingRate": 0.9,
         "texture": [
             "playerShip3_blue.png",
             "playerShip3_blue_boost.png"
