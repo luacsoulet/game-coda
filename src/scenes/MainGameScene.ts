@@ -83,23 +83,17 @@ export class MainGameScene extends Scene {
         this.player = new Player(this, this.cameras.main.centerX, this.cameras.main.height - 128, 'sprites', this.bullets).setOrigin(0.5);
         this.physics.add.existing(this.player);
 
+        // Sélectionner le bon vaisseau au démarrage
+        const selectedShip = this.registry.get(GameDataKeys.SelectedShip) || 1;
+        this.player.selectPlayerShip(selectedShip);
+
         this.player.getComponent(HealthComponent)?.once("death", this.restartGame, this);
 
         if (this.input.keyboard) {
 
-            this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE).on('down', () => {
-                this.player.selectPlayerShip(1);
-            });
-            this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO).on('down', () => {
-                this.player.selectPlayerShip(2);
-            });
-            this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE).on('down', () => {
-                this.player.selectPlayerShip(3);
-            });
             this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R).on('down', () => {
                 this.restartGame();
             });
-
         }
         else {
             console.log('no keyboard input');
