@@ -13,7 +13,7 @@ export class GameOverScene extends Phaser.Scene {
         this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 800, 'Press SPACE to play again', { fontSize: '34px', color: '#fff' }).setOrigin(0.5);
 
         this.input.keyboard?.once('keydown-SPACE', () => {
-            this.scene.start('MainGameScene');
+            this.scene.start('MainMenuScene');
         });
     }
 
