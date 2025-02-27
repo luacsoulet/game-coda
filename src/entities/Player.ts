@@ -5,7 +5,7 @@ import { HealthComponent } from "../components/HealthComponent";
 import { GameDataKeys } from "../GameDataKeys";
 
 export class Player extends Entity {
-    private readonly rateOfFire: number;
+    private rateOfFire: number;
     private playerShipData: PlayerShipData;
     private lastShotTime: number;
     private cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -20,7 +20,6 @@ export class Player extends Entity {
         this.addComponent(new MovementComponent());
         this.addComponent(new HealthComponent(1));
 
-        this.rateOfFire = 0.5;
         this.lastShotTime = 0;
         this.angle = -90;
 
@@ -74,6 +73,8 @@ export class Player extends Entity {
         this.arcadeBody.updateCenter();
 
         this.getComponent(MovementComponent)?.setSpeed(this.playerShipData.movementSpeed);
+        this.getComponent(HealthComponent)?.setHealth(this.playerShipData.health);
+        this.rateOfFire = this.playerShipData.shootingRate;
 
         this.play('playerShipIdle_' + playerShipId);
     }
@@ -82,7 +83,7 @@ export class Player extends Entity {
     preUpdate(timeSinceLaunch: number, deltaTime: number) {
         super.preUpdate(timeSinceLaunch, deltaTime);
         console.log("preupdate called")
-        if (this.playerShipData) {
+        if (this.playerShipData && this.cursorKeys) {
             if (this.cursorKeys.left.isDown) {
                 this.getComponent(MovementComponent)?.moveHorizontally(this, -deltaTime);
                 this.angle = Phaser.Math.Linear(this.angle, -105, 0.1);
@@ -94,12 +95,15 @@ export class Player extends Entity {
             } else {
                 this.angle = Phaser.Math.Linear(this.angle, -90, 0.1);
             }
+
+            if (this.cursorKeys.space.isDown && timeSinceLaunch - this.lastShotTime > this.rateOfFire * 1000) {
+                console.log("Shooting");
+                console.log(this.rateOfFire);
+                this.getComponent(WeaponComponent)?.shoot(this);
+                this.lastShotTime = timeSinceLaunch;
+            }
         }
-        if (this.cursorKeys.space.isDown && timeSinceLaunch - this.lastShotTime > this.rateOfFire * 1000) {
-            console.log("Shooting");
-            this.getComponent(WeaponComponent)?.shoot(this);
-            this.lastShotTime = timeSinceLaunch;
-        }
+
         this.x = Phaser.Math.Clamp(this.x, this.displayWidth / 2, this.scene.cameras.main.width - this.displayWidth / 2);
         this.y = Phaser.Math.Clamp(this.y, this.displayHeight / 2, this.scene.cameras.main.height - this.displayHeight / 2);
     }
