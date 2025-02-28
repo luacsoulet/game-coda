@@ -5,6 +5,7 @@ import { Enemy } from '../entities/Enemy';
 import { Player } from '../entities/Player';
 import { GameDataKeys } from '../GameDataKeys';
 import { HealthComponent } from '../components/HealthComponent';
+import { FormationManager } from '../components/FormationManager';
 
 
 export class MainGameScene extends Scene {
@@ -16,6 +17,7 @@ export class MainGameScene extends Scene {
     private planet: Phaser.GameObjects.Image;
     private planet2: Phaser.GameObjects.Image;
     private scoreText: Phaser.GameObjects.Text;
+    private formationManager: FormationManager;
 
     constructor() {
         super('MainGameScene');
@@ -62,6 +64,7 @@ export class MainGameScene extends Scene {
 
         this.load.json('playerShips', 'Data/playerShips.json');
         this.load.json('enemies', 'Data/enemies.json');
+        this.load.json('formations', 'Data/formations.json');
     }
 
     create() {
@@ -85,7 +88,6 @@ export class MainGameScene extends Scene {
         this.player = new Player(this, this.cameras.main.centerX, this.cameras.main.height - 128, 'sprites', this.bullets).setOrigin(0.5);
         this.physics.add.existing(this.player);
 
-        // Sélectionner le bon vaisseau au démarrage
         const selectedShip = this.registry.get(GameDataKeys.SelectedShip) || 1;
         this.player.selectPlayerShip(selectedShip);
 
@@ -147,14 +149,23 @@ export class MainGameScene extends Scene {
             playerHealth?.inc(-1);
         });
 
+        this.formationManager = new FormationManager(this, this.enemies, this.enemyBullets);
+
         this.time.addEvent({
-            delay: 1500,
-            callback: this.spawnEnemy,
+            delay: 2500,
+            callback: () => this.spawnEnemy(),
             callbackScope: this,
             loop: true,
         });
 
+        this.displayScore();
+    }
 
+    private restartGame() {
+        this.scene.start('GameOverScene');
+    }
+
+    private displayScore() {
         this.add.rectangle(this.cameras.main.centerX, 32, this.cameras.main.width / 5, 140, 0x000000, 0.5);
         this.add.text(this.cameras.main.centerX, 32, 'SCORE', { fontSize: '32px', align: 'center', color: '#fff' }).setOrigin(0.5);
         this.scoreText = this.add.text(this.cameras.main.centerX, 72, '0', { fontSize: '32px', align: 'center', color: '#fff' }).setOrigin(0.5);
@@ -163,57 +174,24 @@ export class MainGameScene extends Scene {
         this.registry.events.on('changedata-' + GameDataKeys.PlayerScore, (_: any, value: number) => {
             this.scoreText.setText(value.toString());
         });
-
-        this.createSwarmEnemy(this.cameras.main.centerX, 100);
-        this.createSaucerEnemy(this.cameras.main.centerX - 100, 150);
-    }
-
-    private restartGame() {
-        // this.data.events.removeAllListeners();
-        this.scene.start('GameOverScene');
     }
 
     private spawnEnemy() {
-        if (this.enemies.countActive() >= 5) {
+
+        if (this.enemies.countActive() >= 10) {
             return;
         }
 
-        // Choisir aléatoirement entre "swarm" et "saucer"
-        const enemyType = Math.random() > 0.5 ? 'swarm' : 'shooter';
+        const enemyType = Math.random() > 0.5 ? 'swarm' : 'saucer';
 
         const x = Phaser.Math.Between(0, this.cameras.main.width);
         const y = 0;
 
         if (enemyType === 'swarm') {
-            this.createSwarmEnemy(x, y);
+            this.formationManager.spawnRandomFormation('swarm');
         } else {
-            this.createShooterEnemy(x, y);
+            this.formationManager.spawnFormation('default', this.cameras.main.centerX, 150, enemyType);
         }
-    }
-    // Créer un ennemi de type "swarm"
-    private createSwarmEnemy(x: number, y: number) {
-        const enemy = new Enemy(this, x, y, 'sprites');
-        enemy.init(this.enemyBullets, 'swarm');
-        enemy.enable(x, y);
-        this.enemies.add(enemy);
-        return enemy;
-    }
-
-    // Créer un ennemi de type "saucer"
-    private createSaucerEnemy(x: number, y: number) {
-        const enemy = new Enemy(this, x, y, 'sprites');
-        enemy.init(this.enemyBullets, 'saucer');
-        enemy.enable(x, y);
-        this.enemies.add(enemy);
-        return enemy;
-    }
-
-    private createShooterEnemy(x: number, y: number) {
-        const enemy = new Enemy(this, x, y, 'sprites');
-        enemy.init(this.enemyBullets, 'shooter');
-        enemy.enable(x, y);
-        this.enemies.add(enemy);
-        return enemy;
     }
 
     update(_timeSinceLaunch: number, deltaTime: number) {
