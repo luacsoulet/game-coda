@@ -1,7 +1,7 @@
 {
     "saucer": {
         "health": 1,
-        "speed": 0.2,
+        "speed": 0.3,
         "points": 1,
         "textures": {
             "default": "ufoRed",
@@ -23,7 +23,7 @@
     },
     "swarm": {
         "health": 2,
-        "speed": 0.15,
+        "speed": 0.18,
         "points": 2,
         "textures": {
             "default": "enemyFleet_1",
@@ -38,41 +38,14 @@
         },
         "weapon": {
             "damage": 1,
-            "fireRate": 2000,
+            "fireRate": 4000,
             "projectileSpeed": 500,
             "projectileTexture": "laserRed05"
-        },
-        "formations": {
-            "line": {
-                "spacing": 80,
-                "count": 4,
-                "direction": "horizontal"
-            },
-            "circle": {
-                "radius": 120,
-                "count": 5,
-                "rotationSpeed": 0.4
-            },
-            "triangle": {
-                "size": 100,
-                "count": 4,
-                "rotationSpeed": 0.2
-            },
-            "square": {
-                "size": 100,
-                "count": 4,
-                "rotationSpeed": 0.3
-            },
-            "zigzag": {
-                "width": 200,
-                "height": 50,
-                "count": 5
-            }
         }
     },
     "shooter": {
         "health": 3,
-        "speed": 0.1,
+        "speed": 0.10,
         "points": 2,
         "textures": {
             "default": "enemyRocket_1",
