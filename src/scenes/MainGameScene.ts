@@ -5,6 +5,8 @@ import { Enemy } from '../entities/Enemy';
 import { Player } from '../entities/Player';
 import { GameDataKeys } from '../GameDataKeys';
 import { HealthComponent } from '../components/HealthComponent';
+import { FormationManager } from '../components/FormationManager';
+
 
 export class MainGameScene extends Scene {
     private player: Player;
@@ -15,6 +17,7 @@ export class MainGameScene extends Scene {
     private planet: Phaser.GameObjects.Image;
     private planet2: Phaser.GameObjects.Image;
     private scoreText: Phaser.GameObjects.Text;
+    private formationManager: FormationManager;
 
     constructor() {
         super('MainGameScene');
@@ -24,8 +27,6 @@ export class MainGameScene extends Scene {
     preload() {
 
         const width: number = this.cameras.main.width;
-        // const height: number = this.cameras.main.height;
-        // const x: number = this.cameras.main.centerX;
         const y: number = this.cameras.main.centerY;
 
         const progressBar = this.add.graphics();
@@ -60,6 +61,8 @@ export class MainGameScene extends Scene {
         this.load.audio('sfx_laser2', 'Sounds/sfx_laser2.ogg');
 
         this.load.json('playerShips', 'Data/playerShips.json');
+        this.load.json('enemies', 'Data/enemies.json');
+        this.load.json('formations', 'Data/formations.json');
     }
 
     create() {
@@ -83,7 +86,6 @@ export class MainGameScene extends Scene {
         this.player = new Player(this, this.cameras.main.centerX, this.cameras.main.height - 128, 'sprites', this.bullets).setOrigin(0.5);
         this.physics.add.existing(this.player);
 
-        // Sélectionner le bon vaisseau au démarrage
         const selectedShip = this.registry.get(GameDataKeys.SelectedShip) || 1;
         this.player.selectPlayerShip(selectedShip);
 
@@ -114,19 +116,19 @@ export class MainGameScene extends Scene {
             defaultKey: 'sprites',
             defaultFrame: 'ufoRed.png',
             runChildUpdate: true,
-            createCallback: (enemy) => {
-                (enemy as Enemy).init(this.enemyBullets);
-            }
         });
 
         const groupUtils = new GroupUtils();
-        groupUtils.preallocateGroup(this.enemyBullets, 5);
+        groupUtils.preallocateGroup(this.enemies, 20);
+
+        this.enemies.getChildren().forEach(enemy => {
+            (enemy as Enemy).init(this.enemyBullets);
+        });
 
         this.physics.add.overlap(this.bullets, this.enemies,
             (bullet, enemy) => {
                 (bullet as Bullet).disable();
                 (enemy as Enemy).getComponent(HealthComponent)?.inc(-1);
-                this.registry.inc(GameDataKeys.PlayerScore, 1);
             }, (bullet, enemy) => {
                 (enemy as Enemy).getComponent(HealthComponent)?.inc(-1);
                 (bullet as Bullet).disable();
@@ -142,30 +144,27 @@ export class MainGameScene extends Scene {
             const enemyHealth = (enemy as Enemy).getComponent(HealthComponent);
             const playerHealth = (player as Player).getComponent(HealthComponent);
 
-            enemyHealth?.inc(-enemyHealth?.getMax());
+            enemyHealth?.inc(-1);
             playerHealth?.inc(-1);
         });
 
-        if (!this.anims.exists('ufoShoot')) {
-            this.anims.create({
-                key: 'ufoShoot',
-                frames: [
-                    { key: 'sprites', frame: 'ufoRed.png' },
-                    { key: 'sprites', frame: 'ufoRed-shoot2.png' },
-                    { key: 'sprites', frame: 'ufoRed-shoot3.png' },
-                ],
-                frameRate: 4,
-            })
-        }
+        this.formationManager = new FormationManager(this, this.enemies, this.enemyBullets);
 
         this.time.addEvent({
-            delay: 1500,
-            callback: this.spawnEnemy,
+            delay: 2500,
+            callback: () => this.spawnEnemy(),
             callbackScope: this,
             loop: true,
         });
 
+        this.displayScore();
+    }
 
+    private restartGame() {
+        this.scene.start('GameOverScene');
+    }
+
+    private displayScore() {
         this.add.rectangle(this.cameras.main.centerX, 32, this.cameras.main.width / 5, 140, 0x000000, 0.5);
         this.add.text(this.cameras.main.centerX, 32, 'SCORE', { fontSize: '32px', align: 'center', color: '#fff' }).setOrigin(0.5);
         this.scoreText = this.add.text(this.cameras.main.centerX, 72, '0', { fontSize: '32px', align: 'center', color: '#fff' }).setOrigin(0.5);
@@ -176,24 +175,20 @@ export class MainGameScene extends Scene {
         });
     }
 
-    private restartGame() {
-        // this.data.events.removeAllListeners();
-        this.scene.start('GameOverScene');
-    }
-
     private spawnEnemy() {
-        if (this.enemies.countActive() >= 5) {
+
+        if (this.enemies.countActive() >= 10) {
             return;
         }
-        const enemy = (this.enemies.get() as Enemy);
-        if (enemy) {
-            enemy.enable(
-                Phaser.Math.Between(0, this.cameras.main.width),
-                0
-            );
+
+        const enemyType = Math.random() > 0.3 ? 'saucer' : 'swarm';
+
+        if (enemyType === 'swarm') {
+            this.formationManager.spawnRandomFormation('swarm');
+        } else {
+            this.formationManager.spawnFormation('default', this.cameras.main.centerX, 150, enemyType);
         }
     }
-
 
     update(_timeSinceLaunch: number, deltaTime: number) {
 

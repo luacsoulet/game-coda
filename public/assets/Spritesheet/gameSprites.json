@@ -4,8 +4,8 @@
 			"image": "gameSprites",
 			"format": "RGBA8888",
 			"size": {
-				"w": 184,
-				"h": 520
+				"w": 358,
+				"h": 337
 			},
 			"scale": 1,
 			"frames": [
@@ -45,8 +45,8 @@
 						"h": 112
 					},
 					"frame": {
-						"x": 0,
-						"y": 112,
+						"x": 93,
+						"y": 0,
 						"w": 93,
 						"h": 112
 					}
@@ -67,7 +67,7 @@
 					},
 					"frame": {
 						"x": 0,
-						"y": 224,
+						"y": 112,
 						"w": 90,
 						"h": 99
 					}
@@ -87,8 +87,8 @@
 						"h": 99
 					},
 					"frame": {
-						"x": 0,
-						"y": 323,
+						"x": 90,
+						"y": 112,
 						"w": 90,
 						"h": 99
 					}
@@ -108,8 +108,8 @@
 						"h": 98
 					},
 					"frame": {
-						"x": 0,
-						"y": 422,
+						"x": 186,
+						"y": 0,
 						"w": 91,
 						"h": 98
 					}
@@ -129,8 +129,8 @@
 						"h": 98
 					},
 					"frame": {
-						"x": 90,
-						"y": 224,
+						"x": 186,
+						"y": 98,
 						"w": 91,
 						"h": 98
 					}
@@ -150,8 +150,8 @@
 						"h": 91
 					},
 					"frame": {
-						"x": 90,
-						"y": 322,
+						"x": 0,
+						"y": 211,
 						"w": 91,
 						"h": 91
 					}
@@ -171,8 +171,8 @@
 						"h": 91
 					},
 					"frame": {
-						"x": 93,
-						"y": 0,
+						"x": 91,
+						"y": 211,
 						"w": 91,
 						"h": 91
 					}
@@ -192,10 +192,325 @@
 						"h": 91
 					},
 					"frame": {
-						"x": 93,
-						"y": 91,
+						"x": 182,
+						"y": 196,
 						"w": 91,
 						"h": 91
+					}
+				},
+				{
+					"filename": "enemyRocket_1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 130,
+						"h": 100
+					},
+					"spriteSourceSize": {
+						"x": 21,
+						"y": 17,
+						"w": 81,
+						"h": 69
+					},
+					"frame": {
+						"x": 277,
+						"y": 0,
+						"w": 81,
+						"h": 69
+					}
+				},
+				{
+					"filename": "enemyRocket_2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 130,
+						"h": 100
+					},
+					"spriteSourceSize": {
+						"x": 25,
+						"y": 16,
+						"w": 80,
+						"h": 68
+					},
+					"frame": {
+						"x": 277,
+						"y": 69,
+						"w": 80,
+						"h": 68
+					}
+				},
+				{
+					"filename": "laserBlue14.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 57,
+						"h": 13
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 57,
+						"h": 13
+					},
+					"frame": {
+						"x": 182,
+						"y": 287,
+						"w": 57,
+						"h": 13
+					}
+				},
+				{
+					"filename": "laserBlue16.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 54,
+						"h": 13
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 54,
+						"h": 13
+					},
+					"frame": {
+						"x": 239,
+						"y": 287,
+						"w": 54,
+						"h": 13
+					}
+				},
+				{
+					"filename": "laserBlue08.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 48,
+						"h": 46
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 48,
+						"h": 46
+					},
+					"frame": {
+						"x": 293,
+						"y": 137,
+						"w": 48,
+						"h": 46
+					}
+				},
+				{
+					"filename": "laserRed08.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 48,
+						"h": 46
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 48,
+						"h": 46
+					},
+					"frame": {
+						"x": 293,
+						"y": 183,
+						"w": 48,
+						"h": 46
+					}
+				},
+				{
+					"filename": "laserRed09.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 48,
+						"h": 46
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 48,
+						"h": 46
+					},
+					"frame": {
+						"x": 273,
+						"y": 229,
+						"w": 48,
+						"h": 46
+					}
+				},
+				{
+					"filename": "enemyFleet_1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 70,
+						"h": 54
+					},
+					"spriteSourceSize": {
+						"x": 12,
+						"y": 9,
+						"w": 44,
+						"h": 35
+					},
+					"frame": {
+						"x": 0,
+						"y": 302,
+						"w": 44,
+						"h": 35
+					}
+				},
+				{
+					"filename": "enemyFleet_2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 70,
+						"h": 54
+					},
+					"spriteSourceSize": {
+						"x": 14,
+						"y": 9,
+						"w": 42,
+						"h": 35
+					},
+					"frame": {
+						"x": 44,
+						"y": 302,
+						"w": 42,
+						"h": 35
+					}
+				},
+				{
+					"filename": "laserRed05.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 37,
+						"h": 9
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 37,
+						"h": 9
+					},
+					"frame": {
+						"x": 321,
+						"y": 229,
+						"w": 37,
+						"h": 9
+					}
+				},
+				{
+					"filename": "spaceMissiles_018.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 35,
+						"h": 20
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 35,
+						"h": 20
+					},
+					"frame": {
+						"x": 321,
+						"y": 238,
+						"w": 35,
+						"h": 20
+					}
+				},
+				{
+					"filename": "things_gold.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 32,
+						"h": 32
+					},
+					"frame": {
+						"x": 86,
+						"y": 302,
+						"w": 32,
+						"h": 32
+					}
+				},
+				{
+					"filename": "bolt_gold.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 19,
+						"h": 30
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 19,
+						"h": 30
+					},
+					"frame": {
+						"x": 273,
+						"y": 196,
+						"w": 19,
+						"h": 30
+					}
+				},
+				{
+					"filename": "shield_silver.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 30,
+						"h": 30
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 30,
+						"h": 30
+					},
+					"frame": {
+						"x": 118,
+						"y": 302,
+						"w": 30,
+						"h": 30
+					}
+				},
+				{
+					"filename": "pill_green.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 22,
+						"h": 21
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 22,
+						"h": 21
+					},
+					"frame": {
+						"x": 148,
+						"y": 302,
+						"w": 22,
+						"h": 21
 					}
 				}
 			]

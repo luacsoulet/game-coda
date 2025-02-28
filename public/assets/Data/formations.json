@@ -1,0 +1,38 @@
+{
+    "default": {
+        "type": "default",
+        "count": 1,
+        "enemyType": "saucer",
+        "spacing": 100
+    },
+    "line": {
+        "type": "line",
+        "count": 4,
+        "enemyType": "swarm",
+        "spacing": 100
+    },
+    "circle": {
+        "type": "circle",
+        "count": 5,
+        "enemyType": "swarm",
+        "radius": 120
+    },
+    "triangle": {
+        "type": "triangle",
+        "count": 3,
+        "enemyType": "swarm",
+        "spacing": 100
+    },
+    "square": {
+        "type": "square",
+        "count": 4,
+        "enemyType": "swarm",
+        "spacing": 100
+    },
+    "zigzag": {
+        "type": "zigzag",
+        "count": 5,
+        "enemyType": "swarm",
+        "spacing": 100
+    }
+}

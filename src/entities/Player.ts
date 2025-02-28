@@ -27,7 +27,15 @@ export class Player extends Entity {
             this.cursorKeys = this.scene.input.keyboard.createCursorKeys();
         }
 
-        this.addComponent(new WeaponComponent(bullets, scene.sound.add('sfx_laser1'), 4, 12, 1024, 0xFFFFFF));
+        this.addComponent(new WeaponComponent(
+            bullets,
+            scene.sound.add('sfx_laser1'),
+            528,
+            1,
+            4,
+            12,
+            0x00FFFF
+        ));
         this.selectPlayerShip(this.scene.registry.get(GameDataKeys.SelectedShip));
 
         this.anims.create({
