@@ -2,10 +2,10 @@ import { Entity } from "../entities/Entity";
 
 export class MovementComponent implements IComponent {
 
-    private speed: number;
+    private speed: number = 0;
 
     public constructor(speed?: number) {
-        if (speed) {
+        if (speed !== undefined) {
             this.speed = speed;
         }
     }
