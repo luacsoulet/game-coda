@@ -16,53 +16,52 @@ export class Enemy extends Entity {
         this.enemyType = 'saucer'; // Type par défaut
     }
 
-    public init(bulletsGroup: Phaser.Physics.Arcade.Group, enemyType?: string) {
-        // Si un type d'ennemi est spécifié, l'utiliser
-        if (enemyType) {
-            this.enemyType = enemyType;
+    public init(bulletsGroup: Phaser.Physics.Arcade.Group, enemyType: string = 'swarm') {
+        this.enemyType = enemyType;
+        console.log(`Initializing enemy of type: ${this.enemyType}`);
+
+        const enemiesData = this.scene.cache.json.get('enemies');
+        this.enemyData = enemiesData[this.enemyType];
+
+        if (!this.enemyData) {
+            console.error(`Enemy type ${this.enemyType} not found in enemies.json`);
+            this.enemyType = 'swarm';
+            this.enemyData = enemiesData[this.enemyType];
         }
 
-        this.angle = 90;
+        if (this.enemyData.textures && this.enemyData.textures.default) {
+            this.setFrame(`${this.enemyData.textures.default}.png`);
+        }
 
-        // Charger les données de l'ennemi depuis le fichier JSON
-        this.loadEnemyData();
+        if (this.enemyData.scale) {
+            this.setScale(this.enemyData.scale);
+        }
 
-        // Configurer le corps en fonction des données
         this.setupBody();
 
-        // Configurer les composants en fonction des données
         this.setupComponents(bulletsGroup);
 
-        // Configurer le timer de tir
+        this.setupAnimations();
+
         this.setupShootTimer();
 
-        // Configurer les animations
-        this.setupAnimations();
-    }
-
-    private loadEnemyData() {
-        // Charger les données depuis le cache JSON
-        const enemiesData = this.scene.cache.json.get('enemies');
-        console.log("Enemies data:", enemiesData);
-
-        if (enemiesData && enemiesData[this.enemyType]) {
-            this.enemyData = enemiesData[this.enemyType];
-        } else {
-            console.warn(`Enemy type ${this.enemyType} not found in enemies data`);
-            this.enemyData = null;
-        }
+        this.setActive(false);
+        this.setVisible(false);
     }
 
     private setupBody() {
         const body = this.body as Phaser.Physics.Arcade.Body;
 
-        if (this.enemyData && this.enemyData.body) {
-            const bodyConfig = this.enemyData.body;
-            body.setCircle(bodyConfig.radius, bodyConfig.offsetX, bodyConfig.offsetY);
-            this.setScale(this.enemyData.scale || 1);
-        } else {
-            // Configuration par défaut
-            body.setCircle(this.displayWidth / 2);
+        if (this.enemyData.body) {
+            const body = this.body as Phaser.Physics.Arcade.Body;
+            if (this.enemyData.body.radius) {
+                body.setCircle(
+                    this.enemyData.body.radius,
+                    this.enemyData.body.offsetX || 0,
+                    this.enemyData.body.offsetY || 0
+                );
+                this.setAngle(90);
+            }
         }
     }
 
@@ -72,8 +71,8 @@ export class Enemy extends Entity {
             this.addComponent(new WeaponComponent(
                 bulletsGroup,
                 this.scene.sound.add('sfx_laser2'),
-                4, // bulletSpeed
-                1  // bulletDamage
+                4,
+                1
             ));
             this.addComponent(new MovementComponent(0.2));
             this.addComponent(new HealthComponent(1));
@@ -86,35 +85,32 @@ export class Enemy extends Entity {
             this.addComponent(new WeaponComponent(
                 bulletsGroup,
                 this.scene.sound.add('sfx_laser2'),
-                weaponConfig.projectileSpeed || 4, // bulletSpeed
-                weaponConfig.damage || 1 // bulletDamage
+                weaponConfig.projectileSpeed || 4,
+                weaponConfig.damage || 1
             ));
         } else {
             this.addComponent(new WeaponComponent(
                 bulletsGroup,
                 this.scene.sound.add('sfx_laser2'),
-                4, // bulletSpeed
-                1  // bulletDamage
+                4,
+                1
             ));
         }
 
-        // Ajouter le composant de mouvement
         this.addComponent(new MovementComponent(this.enemyData.speed || 0.2));
 
-        // Ajouter le composant de santé
         this.addComponent(new HealthComponent(this.enemyData.health || 1));
     }
 
     private setupShootTimer() {
-        // Configurer le timer de tir en fonction du type d'ennemi
-        let delay = 3000; // Délai par défaut
+        let delay = 3000;
 
         if (this.enemyData && this.enemyData.weapon) {
             delay = this.enemyData.weapon.fireRate || delay;
         }
 
         this.shootTimerConfig = {
-            delay: Phaser.Math.Between(delay * 0.8, delay * 1.2), // Ajouter un peu de variabilité
+            delay: Phaser.Math.Between(delay * 0.8, delay * 1.2),
             callback: this.shoot,
             callbackScope: this,
             loop: true,
@@ -129,7 +125,6 @@ export class Enemy extends Entity {
         const textures = this.enemyData.textures;
 
         if (this.enemyType !== 'saucer') {
-            // Animation d'idle pour les types autres que saucer
             const idleAnimKey = `${this.enemyType}Idle`;
             if (!this.scene.anims.exists(idleAnimKey)) {
                 this.scene.anims.create({
@@ -143,7 +138,6 @@ export class Enemy extends Entity {
                 });
             }
         } else {
-            // Animation de tir uniquement pour le saucer
             const shootAnimKey = `${this.enemyType}Shoot`;
             if (!this.scene.anims.exists(shootAnimKey)) {
                 this.scene.anims.create({
@@ -183,26 +177,21 @@ export class Enemy extends Entity {
         this.setActive(true);
         this.setVisible(true);
 
-        // Démarrer l'animation d'idle pour les types autres que saucer
         if (this.enemyType !== 'saucer') {
             this.play(`${this.enemyType}Idle`);
         } else {
-            // Pour le saucer, juste afficher la frame par défaut
             this.setFrame(`${this.enemyData.textures.default}.png`);
         }
 
-        // Activer le corps physique
         this.scene.physics.world.enable(this);
         (this.body as Phaser.Physics.Arcade.Body).setEnable(true);
 
-        // Réinitialiser le timer de tir
         if (this.shootTimer) {
             this.shootTimer.reset(this.shootTimerConfig);
             this.shootTimer.paused = false;
         }
 
         this.getComponent(HealthComponent)?.once("death", () => {
-            // Ajouter des points au score si l'ennemi a une valeur en points
             if (this.enemyData && this.enemyData.points) {
                 this.scene.registry.inc('playerScore', this.enemyData.points);
             }
@@ -222,7 +211,6 @@ export class Enemy extends Entity {
     private shoot() {
         if (this.active) {
             if (this.enemyType === 'saucer') {
-                // Pour le saucer, jouer l'animation de tir
                 const shootAnimKey = `${this.enemyType}Shoot`;
                 if (this.scene.anims.exists(shootAnimKey)) {
                     this.play(shootAnimKey);
@@ -230,16 +218,13 @@ export class Enemy extends Entity {
                         this.getComponent(WeaponComponent)?.shoot(this as Entity);
                         this.scene.sound.play('sfx_laser2');
 
-                        // Revenir à la frame par défaut
                         this.setFrame(`${this.enemyData.textures.default}.png`);
                     });
                 } else {
-                    // Fallback si l'animation n'existe pas
                     this.getComponent(WeaponComponent)?.shoot(this as Entity);
                     this.scene.sound.play('sfx_laser2');
                 }
             } else {
-                // Pour les autres types, tirer directement sans animation de tir
                 this.getComponent(WeaponComponent)?.shoot(this as Entity);
                 this.scene.sound.play('sfx_laser2');
             }
@@ -252,7 +237,6 @@ export class Enemy extends Entity {
             this.disable();
         }
 
-        // Mettre à jour le mouvement si l'ennemi n'est pas dans une formation
         if (!this.formationData) {
             this.getComponent(MovementComponent)?.moveVertically(this, deltaTime);
         }
