@@ -2,23 +2,39 @@ import { Entity } from "./Entity";
 import { WeaponComponent } from "../components/WeaponComponent";
 import { MovementComponent } from "../components/MovementComponent";
 import { HealthComponent } from "../components/HealthComponent";
+import { EnemyData } from "../gameData/EnemyData";
 
 export class Enemy extends Entity {
     private shootTimer: Phaser.Time.TimerEvent;
     private shootTimerConfig: Phaser.Types.Time.TimerEventConfig;
     private enemyType: string;
-    private enemyData: any;
+    private enemyData: EnemyData;
     private formationData: any = null;
     private idleAnimation: Phaser.Animations.Animation;
+    private enemyBullets: Phaser.Physics.Arcade.Group;
+    private initialized: boolean = false;
+    private initialSpawn: boolean = false;
 
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, frame?: string | number) {
         super(scene, x, y, texture, frame as string);
         this.enemyType = 'saucer'; // Type par défaut
     }
 
-    public init(bulletsGroup: Phaser.Physics.Arcade.Group, enemyType: string = 'swarm') {
+    public isInitialized(): boolean {
+        return this.initialized;
+    }
+
+    public init(bulletsGroup: Phaser.Physics.Arcade.Group) {
+        this.enemyBullets = bulletsGroup;
+        this.initialized = true;
+
+        this.setActive(false);
+        this.setVisible(false);
+    }
+
+    public enable(x: number, y: number, enemyType: string = 'swarm') {
         this.enemyType = enemyType;
-        console.log(`Initializing enemy of type: ${this.enemyType}`);
+        this.initialSpawn = true;
 
         const enemiesData = this.scene.cache.json.get('enemies');
         this.enemyData = enemiesData[this.enemyType];
@@ -29,28 +45,76 @@ export class Enemy extends Entity {
             this.enemyData = enemiesData[this.enemyType];
         }
 
+        // Réinitialiser complètement le sprite
+        this.setTexture('sprites');
+
         if (this.enemyData.textures && this.enemyData.textures.default) {
             this.setFrame(`${this.enemyData.textures.default}.png`);
         }
 
         if (this.enemyData.scale) {
             this.setScale(this.enemyData.scale);
+        } else {
+            this.setScale(1);
         }
 
+        this.anims.stop();
+
         this.setupBody();
-
-        this.setupComponents(bulletsGroup);
-
+        this.setupComponents();
         this.setupAnimations();
-
         this.setupShootTimer();
 
-        this.setActive(false);
-        this.setVisible(false);
+        // Animation d'apparition pour les swarm
+        if (this.enemyType === 'swarm') {
+            this.setPosition(x, y);
+            this.alpha = 0;
+            this.scene.tweens.add({
+                targets: this,
+                alpha: 1,
+                duration: 500,
+                ease: 'Power2'
+            });
+            this.initialSpawn = false;
+        } else {
+            this.setPosition(x, y - 200);
+            this.alpha = 1;
+        }
+
+        this.setActive(true);
+        this.setVisible(true);
+
+        if (this.enemyType !== 'saucer') {
+            this.play(`${this.enemyType}Idle`);
+        } else {
+            this.setFrame(`${this.enemyData.textures.default}.png`);
+        }
+
+        this.scene.physics.world.enable(this);
+        (this.body as Phaser.Physics.Arcade.Body).setEnable(true);
+
+        if (this.shootTimer) {
+            this.shootTimer.reset(this.shootTimerConfig);
+            this.shootTimer.paused = false;
+
+            if (this.enemyType === 'saucer') {
+                this.shootTimer.destroy();
+                this.shootTimerConfig.delay = Phaser.Math.Between(1500, 2000);
+                this.shootTimer = this.scene.time.addEvent(this.shootTimerConfig);
+            }
+        }
+
+        this.getComponent(HealthComponent)?.once("death", () => {
+            if (this.enemyData && this.enemyData.points) {
+                this.scene.registry.inc('playerScore', this.enemyData.points);
+            }
+
+            this.disable();
+        });
     }
 
     private setupBody() {
-        const body = this.body as Phaser.Physics.Arcade.Body;
+        this.body as Phaser.Physics.Arcade.Body;
 
         if (this.enemyData.body) {
             const body = this.body as Phaser.Physics.Arcade.Body;
@@ -65,45 +129,62 @@ export class Enemy extends Entity {
         }
     }
 
-    private setupComponents(bulletsGroup: Phaser.Physics.Arcade.Group) {
+    private setupComponents() {
         if (!this.enemyData) {
-            // Configuration par défaut
+            this.removeComponents(WeaponComponent);
             this.addComponent(new WeaponComponent(
-                bulletsGroup,
+                this.enemyBullets,
                 this.scene.sound.add('sfx_laser2'),
                 4,
                 1
             ));
+
+            this.removeComponents(MovementComponent);
             this.addComponent(new MovementComponent(0.2));
+
+            this.removeComponents(HealthComponent);
             this.addComponent(new HealthComponent(1));
             return;
-        }
-
-        // Ajouter le composant d'arme
-        if (this.enemyData.weapon) {
-            const weaponConfig = this.enemyData.weapon;
-            this.addComponent(new WeaponComponent(
-                bulletsGroup,
-                this.scene.sound.add('sfx_laser2'),
-                weaponConfig.projectileSpeed || 4,
-                weaponConfig.damage || 1
-            ));
         } else {
-            this.addComponent(new WeaponComponent(
-                bulletsGroup,
-                this.scene.sound.add('sfx_laser2'),
-                4,
-                1
-            ));
+
+            // Weapon
+            this.removeComponents(WeaponComponent);
+            if (this.enemyData.weapon) {
+                this.addComponent(new WeaponComponent(
+                    this.enemyBullets,
+                    this.scene.sound.add('sfx_laser2'),
+                    this.enemyData.weapon.projectileSpeed || 4,
+                    this.enemyData.weapon.damage || 1
+                ));
+            } else {
+                this.addComponent(new WeaponComponent(
+                    this.enemyBullets,
+                    this.scene.sound.add('sfx_laser2'),
+                    4,
+                    1
+                ));
+            }
+
+            // Movement
+            this.removeComponents(MovementComponent);
+            if (this.enemyData.speed) {
+                this.addComponent(new MovementComponent(this.enemyData.speed));
+            } else {
+                this.addComponent(new MovementComponent(0.2));
+            }
+
+            // Health
+            this.removeComponents(HealthComponent);
+            if (this.enemyData.health) {
+                this.addComponent(new HealthComponent(this.enemyData.health));
+            } else {
+                this.addComponent(new HealthComponent(1));
+            }
         }
-
-        this.addComponent(new MovementComponent(this.enemyData.speed || 0.2));
-
-        this.addComponent(new HealthComponent(this.enemyData.health || 1));
     }
 
     private setupShootTimer() {
-        let delay = 3000;
+        let delay = this.enemyData.weapon?.fireRate || 3000;
 
         if (this.enemyData && this.enemyData.weapon) {
             delay = this.enemyData.weapon.fireRate || delay;
@@ -172,40 +253,22 @@ export class Enemy extends Entity {
         return this.formationData;
     }
 
-    public enable(x: number, y: number) {
-        this.setPosition(x, y);
-        this.setActive(true);
-        this.setVisible(true);
-
-        if (this.enemyType !== 'saucer') {
-            this.play(`${this.enemyType}Idle`);
-        } else {
-            this.setFrame(`${this.enemyData.textures.default}.png`);
-        }
-
-        this.scene.physics.world.enable(this);
-        (this.body as Phaser.Physics.Arcade.Body).setEnable(true);
-
-        if (this.shootTimer) {
-            this.shootTimer.reset(this.shootTimerConfig);
-            this.shootTimer.paused = false;
-        }
-
-        this.getComponent(HealthComponent)?.once("death", () => {
-            if (this.enemyData && this.enemyData.points) {
-                this.scene.registry.inc('playerScore', this.enemyData.points);
-            }
-
-            this.disable();
-        });
-    }
-
     public disable() {
+        this.anims.stop();
+
+        this.enemyType = 'saucer';
+
         this.disableBody(true, true);
         this.scene.physics.world.disable(this);
+
         if (this.shootTimer) {
             this.shootTimer.paused = true;
         }
+
+        this.setActive(false);
+        this.setVisible(false);
+
+        this.initialSpawn = false;
     }
 
     private shoot() {
