@@ -1,4 +1,4 @@
-type EnemyConfig = {
+export type EnemyData = {
     health: number,
     speed: number,
     points: number,
@@ -18,5 +18,5 @@ type EnemyConfig = {
         fireRate: number,
         projectileSpeed: number,
         projectileTexture: string,
-    },
+    }
 }
