@@ -1,8 +1,9 @@
 import { Enemy } from "../entities/Enemy";
+import { FormationFile } from "../gameData/FormationData";
 
 export class FormationManager {
     private scene: Phaser.Scene;
-    private formations: any;
+    private formations: FormationFile;
     private enemies: Phaser.GameObjects.Group;
     private enemyBullets: Phaser.Physics.Arcade.Group;
 
@@ -25,22 +26,26 @@ export class FormationManager {
 
         switch (formation.type) {
             case 'default':
-                this.spawnDefaultFormation(x, y, count, type);
+                if (type === 'shooter' || type === 'saucer') {
+                    this.spawnDefaultFormation(x, y, count, type);
+                } else {
+                    this.spawnLineFormation(x, y, count, type, formation.spacing || 50);
+                }
                 break;
             case 'line':
-                this.spawnLineFormation(x, y, count, type, formation.spacing);
+                this.spawnLineFormation(x, y, count, type, formation.spacing || 50);
                 break;
             case 'circle':
-                this.spawnCircleFormation(x, y, count, type, formation.radius);
+                this.spawnCircleFormation(x, y, count, type, formation.radius || 100);
                 break;
             case 'triangle':
-                this.spawnTriangleFormation(x, y, count, type, formation.spacing);
+                this.spawnTriangleFormation(x, y, count, type, formation.spacing || 50);
                 break;
             case 'square':
-                this.spawnSquareFormation(x, y, count, type, formation.spacing);
+                this.spawnSquareFormation(x, y, count, type, formation.spacing || 50);
                 break;
             case 'zigzag':
-                this.spawnZigzagFormation(x, y, count, type, formation.spacing);
+                this.spawnZigzagFormation(x, y, count, type, formation.spacing || 50);
                 break;
             default:
                 console.error(`Unknown formation type: ${formation.type}`);
@@ -50,15 +55,28 @@ export class FormationManager {
     private createEnemy(x: number, y: number, type: string): Enemy {
         const enemy = this.enemies.get() as Enemy;
         if (enemy) {
-            enemy.init(this.enemyBullets, type);
-            enemy.enable(x, y);
+            if (!enemy.isInitialized()) {
+                enemy.init(this.enemyBullets);
+            }
+            enemy.enable(x, y, type);
         }
         return enemy;
     }
 
     private spawnDefaultFormation(x: number, y: number, count: number, type: string) {
-        for (let i = 0; i < count; i++) {
-            this.createEnemy(x, y, type);
+        if (type === 'saucer') {
+            const margin = 50;
+
+            for (let i = 0; i < count; i++) {
+                const randomX = Phaser.Math.Between(margin, this.scene.cameras.main.width - margin);
+                // Garder le même décalage vertical pour tous les ennemis
+                const randomY = y + Phaser.Math.Between(0, 100);
+                this.createEnemy(randomX, randomY, type);
+            }
+        } else {
+            for (let i = 0; i < count; i++) {
+                this.createEnemy(x, y, type);
+            }
         }
     }
 
@@ -81,7 +99,6 @@ export class FormationManager {
     }
 
     private spawnTriangleFormation(x: number, y: number, count: number, type: string, spacing: number) {
-        // Calculer combien de lignes sont nécessaires
         let totalEnemies = 0;
         let rows = 0;
 
@@ -90,7 +107,6 @@ export class FormationManager {
             totalEnemies += rows;
         }
 
-        // Ajuster si on a trop d'ennemis
         let remainingEnemies = count;
         let currentY = y;
 
@@ -112,7 +128,6 @@ export class FormationManager {
     }
 
     private spawnSquareFormation(x: number, y: number, count: number, type: string, spacing: number) {
-        // Calculer la taille du carré
         const side = Math.ceil(Math.sqrt(count));
         const startX = x - ((side - 1) * spacing) / 2;
         const startY = y - ((side - 1) * spacing) / 2;
@@ -149,7 +164,8 @@ export class FormationManager {
             return;
         }
 
-        const formationTypes = Object.keys(this.formations);
+        const formationTypes = Object.keys(this.formations).filter(type => type !== 'default');
+
         if (formationTypes.length === 0) {
             console.error("No formations available");
             return;
