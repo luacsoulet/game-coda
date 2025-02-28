@@ -27,8 +27,6 @@ export class MainGameScene extends Scene {
     preload() {
 
         const width: number = this.cameras.main.width;
-        // const height: number = this.cameras.main.height;
-        // const x: number = this.cameras.main.centerX;
         const y: number = this.cameras.main.centerY;
 
         const progressBar = this.add.graphics();
@@ -118,13 +116,14 @@ export class MainGameScene extends Scene {
             defaultKey: 'sprites',
             defaultFrame: 'ufoRed.png',
             runChildUpdate: true,
-            createCallback: (enemy) => {
-                (enemy as Enemy).init(this.enemyBullets);
-            }
         });
 
         const groupUtils = new GroupUtils();
-        groupUtils.preallocateGroup(this.enemyBullets, 5);
+        groupUtils.preallocateGroup(this.enemies, 20);
+
+        this.enemies.getChildren().forEach(enemy => {
+            (enemy as Enemy).init(this.enemyBullets);
+        });
 
         this.physics.add.overlap(this.bullets, this.enemies,
             (bullet, enemy) => {
@@ -182,10 +181,7 @@ export class MainGameScene extends Scene {
             return;
         }
 
-        const enemyType = Math.random() > 0.5 ? 'swarm' : 'saucer';
-
-        const x = Phaser.Math.Between(0, this.cameras.main.width);
-        const y = 0;
+        const enemyType = Math.random() > 0.3 ? 'saucer' : 'swarm';
 
         if (enemyType === 'swarm') {
             this.formationManager.spawnRandomFormation('swarm');
