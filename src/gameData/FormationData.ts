@@ -1,4 +1,9 @@
-type FormationConfig = {
+export type FormationFile = {
+    [key: string]: FormationData;
+}
+
+
+type FormationData = {
     type: string,
     count: number,
     enemyType: string,
