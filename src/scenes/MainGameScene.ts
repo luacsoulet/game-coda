@@ -164,7 +164,7 @@ export class MainGameScene extends Scene {
     }
 
     private restartGame() {
-        // this.scene.start('GameOverScene');
+        this.scene.start('GameOverScene');
         this.scene.restart();
         this.scene.start('MainGameUiScene');
     }
