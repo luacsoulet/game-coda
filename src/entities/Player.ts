@@ -36,7 +36,11 @@ export class Player extends Entity {
             12,
             0x00FFFF
         ));
-        this.selectPlayerShip(this.scene.registry.get(GameDataKeys.SelectedShip));
+        if (this.scene.registry.get(GameDataKeys.SelectedShip)) {
+            this.selectPlayerShip(this.scene.registry.get(GameDataKeys.SelectedShip));
+        } else {
+            this.selectPlayerShip(1);
+        }
 
         this.anims.create({
             key: 'playerShipIdle_1',
@@ -83,6 +87,10 @@ export class Player extends Entity {
         this.getComponent(MovementComponent)?.setSpeed(this.playerShipData.movementSpeed);
         this.getComponent(HealthComponent)?.setHealth(this.playerShipData.health);
         this.rateOfFire = this.playerShipData.shootingRate;
+
+        this.scene.registry.set<number>(GameDataKeys.PlayerShield, this.playerShipData.health);
+        this.scene.registry.set<number>(GameDataKeys.PlayerSpeed, this.playerShipData.movementSpeed);
+        this.scene.registry.set<number>(GameDataKeys.PlayerShootingRate, this.playerShipData.shootingRate);
 
         this.play('playerShipIdle_' + playerShipId);
     }

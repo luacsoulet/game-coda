@@ -6,7 +6,7 @@ import { Player } from '../entities/Player';
 import { GameDataKeys } from '../GameDataKeys';
 import { HealthComponent } from '../components/HealthComponent';
 import { FormationManager } from '../components/FormationManager';
-
+import { MainGameUiScene } from './MainGameUiScene';
 
 export class MainGameScene extends Scene {
     private player: Player;
@@ -66,6 +66,8 @@ export class MainGameScene extends Scene {
     }
 
     create() {
+        this.scene.add('MainGameUiScene', MainGameUiScene);
+        this.scene.launch('MainGameUiScene');
 
         this.bg = this.add.tileSprite(0, 0, this.cameras.main.width, this.cameras.main.height, 'bg').setOrigin(0).setTileScale(2);
 
@@ -137,6 +139,7 @@ export class MainGameScene extends Scene {
         this.physics.add.overlap(this.player, this.enemyBullets, (player, enemyBullet) => {
             (enemyBullet as Bullet).disable();
             (player as Player).getComponent(HealthComponent)?.inc(-1);
+            this.registry.inc(GameDataKeys.PlayerShield, -1);
         });
 
         this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
@@ -146,6 +149,7 @@ export class MainGameScene extends Scene {
 
             enemyHealth?.inc(-1);
             playerHealth?.inc(-1);
+            this.registry.inc(GameDataKeys.PlayerShield, -1);
         });
 
         this.formationManager = new FormationManager(this, this.enemies, this.enemyBullets);
@@ -157,22 +161,12 @@ export class MainGameScene extends Scene {
             loop: true,
         });
 
-        this.displayScore();
     }
 
     private restartGame() {
-        this.scene.start('GameOverScene');
-    }
-
-    private displayScore() {
-        this.add.rectangle(this.cameras.main.centerX, 32, this.cameras.main.width / 5, 140, 0x000000, 0.5);
-        this.add.text(this.cameras.main.centerX, 32, 'SCORE', { fontSize: '32px', align: 'center', color: '#fff' }).setOrigin(0.5);
-        this.scoreText = this.add.text(this.cameras.main.centerX, 72, '0', { fontSize: '32px', align: 'center', color: '#fff' }).setOrigin(0.5);
-
-        this.registry.set<number>(GameDataKeys.PlayerScore, 0);
-        this.registry.events.on('changedata-' + GameDataKeys.PlayerScore, (_: any, value: number) => {
-            this.scoreText.setText(value.toString());
-        });
+        // this.scene.start('GameOverScene');
+        this.scene.restart();
+        this.scene.start('MainGameUiScene');
     }
 
     private spawnEnemy() {
