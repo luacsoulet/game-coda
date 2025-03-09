@@ -68,6 +68,7 @@ export class MainGameScene extends Scene {
     create() {
         this.scene.add('MainGameUiScene', MainGameUiScene);
         this.scene.launch('MainGameUiScene');
+        this.scene.remove('MainMenuUiScene');
 
         this.bg = this.add.tileSprite(0, 0, this.cameras.main.width, this.cameras.main.height, 'bg').setOrigin(0).setTileScale(2);
 
@@ -140,12 +141,14 @@ export class MainGameScene extends Scene {
             (enemyBullet as Bullet).disable();
             (player as Player).getComponent(HealthComponent)?.inc(-1);
             this.registry.inc(GameDataKeys.PlayerShield, -1);
+            this.cameras.main.shake(100, 0.01);
         });
 
         this.physics.add.collider(this.player, this.enemies, (player, enemy) => {
 
             const enemyHealth = (enemy as Enemy).getComponent(HealthComponent);
             const playerHealth = (player as Player).getComponent(HealthComponent);
+            this.cameras.main.shake(100, 0.05);
 
             enemyHealth?.inc(-1);
             playerHealth?.inc(-1);
@@ -164,9 +167,7 @@ export class MainGameScene extends Scene {
     }
 
     private restartGame() {
-        // this.scene.start('GameOverScene');
-        this.scene.restart();
-        this.scene.start('MainGameUiScene');
+        this.scene.start('GameOverScene');
     }
 
     private spawnEnemy() {
