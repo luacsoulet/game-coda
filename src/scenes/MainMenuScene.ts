@@ -1,4 +1,5 @@
 import { GameDataKeys } from '../GameDataKeys';
+import { MainMenuUiScene } from './MainMenuUiScene';
 
 export class MainMenuScene extends Phaser.Scene {
 
@@ -28,13 +29,18 @@ export class MainMenuScene extends Phaser.Scene {
     }
 
     create() {
+        this.scene.add('MainMenuUiScene', MainMenuUiScene);
+        this.scene.remove('GameOverUiScene');
+        this.scene.launch('MainMenuUiScene');
+
         this.bg = this.add.tileSprite(0, 0, this.cameras.main.width, this.cameras.main.height, 'bg').setOrigin(0).setTileScale(2);
 
         const playerShipOffsetX = 200;
+        const yOffset = -200; // Décalage de 200px vers le haut
 
-        this.playerShip1 = this.add.sprite(this.cameras.main.centerX - playerShipOffsetX, this.cameras.main.centerY + 228, 'sprites', 'playerShip1_blue.png');
-        this.playerShip2 = this.add.sprite(this.cameras.main.centerX + playerShipOffsetX, this.cameras.main.centerY + 228, 'sprites', 'playerShip2_blue.png');
-        this.playerShip3 = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, 'sprites', 'playerShip3_blue.png');
+        this.playerShip1 = this.add.sprite(this.cameras.main.centerX - playerShipOffsetX, this.cameras.main.centerY + 228 + yOffset, 'sprites', 'playerShip1_blue.png');
+        this.playerShip2 = this.add.sprite(this.cameras.main.centerX + playerShipOffsetX, this.cameras.main.centerY + 228 + yOffset, 'sprites', 'playerShip2_blue.png');
+        this.playerShip3 = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY + yOffset, 'sprites', 'playerShip3_blue.png');
 
 
         // Création des animations pour les vaisseaux de façon factorisée
@@ -56,10 +62,6 @@ export class MainMenuScene extends Phaser.Scene {
         }
 
         this.cameras.main.setBackgroundColor('#000');
-
-        this.add.text(this.cameras.main.centerX, 256, 'Main Menu', { fontSize: '64px', color: '#fff', fontFamily: 'font' }).setOrigin(0.5);
-        this.add.text(this.cameras.main.centerX, this.cameras.main.height - 200, 'Press SPACE to play', { fontSize: '34px', color: '#fff', fontFamily: 'font' }).setOrigin(0.5);
-        this.add.text(this.cameras.main.centerX, this.cameras.main.height - 356, 'Use arrows to select and SPACE to play', { fontSize: '24px', color: '#fff', fontFamily: 'font' }).setOrigin(0.5);
 
         this.input.keyboard?.once('keydown-SPACE', () => {
             this.scene.start('MainGameScene', { selectedShip: this.selectedShip });
@@ -84,18 +86,20 @@ export class MainMenuScene extends Phaser.Scene {
         if (Phaser.Input.Keyboard.JustDown(this.cursorKeys.left)) {
             this.selectedShip = this.selectedShip === 1 ? 3 : this.selectedShip - 1;
             this.registry.set(GameDataKeys.SelectedShip, this.selectedShip);
+            console.log(GameDataKeys.SelectedShip);
             this.highlightSelectedShip();
         }
         if (Phaser.Input.Keyboard.JustDown(this.cursorKeys.right)) {
             this.selectedShip = this.selectedShip === 3 ? 1 : this.selectedShip + 1;
             this.registry.set(GameDataKeys.SelectedShip, this.selectedShip);
+            console.log(GameDataKeys.SelectedShip);
             this.highlightSelectedShip();
         }
     }
 
     private highlightSelectedShip() {
         const centerX = this.cameras.main.centerX;
-        const centerY = this.cameras.main.centerY;
+        const centerY = this.cameras.main.centerY - 200; // Ajout du décalage de 200px vers le haut
         const offsetX = 200;
         const offsetY = 228;
         const duration = 500;
