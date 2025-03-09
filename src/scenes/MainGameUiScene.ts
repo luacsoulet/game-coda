@@ -81,15 +81,30 @@ export class MainGameUiScene extends Phaser.Scene {
     }
 
     private displayScore() {
-        this.add.image(this.cameras.main.centerX + 450, 78, 'meteors', 'meteors.png').setScale(0.6).setAngle(-90);
+        this.add.image(this.cameras.main.centerX + 450, 78, 'meteors').setScale(0.6).setAngle(-90);
 
         let starText = this.add.text(this.cameras.main.centerX + 440, 75, "0",
             { fontSize: '32px', align: 'center', color: '#fff' }).setOrigin(0.6);
 
-        this.add.image(this.cameras.main.centerX + 485, 70, 'sprites', 'star_gold.png').setScale(1.5);
+        if (this.textures.exists('sprites')) {
+            this.add.image(this.cameras.main.centerX + 485, 70, 'sprites', 'star_gold.png').setScale(1.5);
+        } else {
+            console.warn("Texture 'sprites' not found");
+        }
 
-        this.registry.events.on('changedata-' + GameDataKeys.PlayerScore, (_: any, value: number) => {
-            starText.setText(value.toString() + "x ");
+        const updateScoreText = (_: any, value: number) => {
+            // Vérifiez si starText existe toujours et si la scène est active
+            if (starText && starText.scene && starText.scene.sys.isActive()) {
+                starText.setText(value.toString() + "x ");
+            } else {
+                this.registry.events.off('changedata-' + GameDataKeys.PlayerScore, updateScoreText);
+            }
+        };
+
+        this.registry.events.on('changedata-' + GameDataKeys.PlayerScore, updateScoreText);
+
+        this.events.once('shutdown', () => {
+            this.registry.events.off('changedata-' + GameDataKeys.PlayerScore, updateScoreText);
         });
     }
 }
