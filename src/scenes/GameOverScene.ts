@@ -1,4 +1,4 @@
-import { GameDataKeys } from "../GameDataKeys";
+import { GameOverUiScene } from './GameOverUiScene';
 
 export class GameOverScene extends Phaser.Scene {
 
@@ -8,13 +8,13 @@ export class GameOverScene extends Phaser.Scene {
 
     create() {
         this.cameras.main.setBackgroundColor('#000');
-        this.add.text(this.cameras.main.centerX, this.cameras.main.centerY - 800, 'Your score: ' + this.registry.get(GameDataKeys.PlayerScore), { fontSize: '40px', color: '#fff' }).setOrigin(0.5);
-        this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, 'Game Over', { fontSize: '96px', color: '#fff' }).setOrigin(0.5);
-        this.add.text(this.cameras.main.centerX, this.cameras.main.centerY + 800, 'Press SPACE to play again', { fontSize: '34px', color: '#fff' }).setOrigin(0.5);
+
+        this.scene.add('GameOverUiScene', GameOverUiScene);
+        this.scene.launch('GameOverUiScene');
+        this.scene.remove('MainGameUiScene');
 
         this.input.keyboard?.once('keydown-SPACE', () => {
             this.scene.start('MainMenuScene');
         });
     }
-
 }
